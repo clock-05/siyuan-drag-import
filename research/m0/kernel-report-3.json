@@ -1,0 +1,253 @@
+[
+  {
+    "name": "0 SQL 对既有笔记本可用性（只读）",
+    "ok": true,
+    "openedNotebooks": [
+      "我的笔记本",
+      "日常",
+      "其他"
+    ],
+    "res": [
+      {
+        "nb": "我的笔记本",
+        "code": 0,
+        "count": 3,
+        "ms": 4.5
+      },
+      {
+        "nb": "日常",
+        "code": 0,
+        "count": 2,
+        "ms": 3.1
+      },
+      {
+        "nb": "其他",
+        "code": 0,
+        "count": 2,
+        "ms": 2.2
+      }
+    ]
+  },
+  {
+    "name": "1 .sy 头部字段",
+    "ok": true,
+    "created": "20261024154409-t86l4dp",
+    "disk": [
+      {
+        "path": "/20261024154409-3lvpvqv/20261024154409-saz9u1n/20261024154409-t86l4dp.sy",
+        "depth": 2,
+        "keys": "raw"
+      },
+      {
+        "path": "/20261024154409-3lvpvqv/20261024154409-saz9u1n.sy",
+        "depth": 1,
+        "keys": "raw"
+      },
+      {
+        "path": "/20261024154409-3lvpvqv.sy",
+        "depth": 0,
+        "keys": "raw"
+      }
+    ],
+    "rawHead": "{\"ID\":\"20261024154409-3lvpvqv\",\"Spec\":\"2\",\"Type\":\"NodeDocument\",\"Properties\":{\"id\":\"20261024154409-3lvpvqv\",\"title\":\"A\",\"type\":\"doc\",\"updated\":\"20261024154409\"},\"Children\":[{\"ID\":\"20261024154409-wyyoqc1\",\"Type\":\"NodeParagraph\",\"Properties\":{\"id\":\"20261024154409-wyyoqc1\",\"updated\":\"20261024154409\"}}]}"
+  },
+  {
+    "name": "2 SQL 索引延迟（同一篇文档）",
+    "ok": true,
+    "marks": [
+      {
+        "elapsedTarget": 0,
+        "rows": 0,
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "elapsedTarget": 300,
+        "rows": 0,
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "elapsedTarget": 1000,
+        "rows": 3,
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "elapsedTarget": 3000,
+        "rows": 3,
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "elapsedTarget": 8000,
+        "rows": 3,
+        "code": 0,
+        "msg": ""
+      }
+    ]
+  },
+  {
+    "name": "3 命名边界的真实落地值",
+    "ok": true,
+    "codes": [
+      {
+        "label": "首尾空格",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "冒号",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "反斜杠",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "问号星号",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "尖括号竖线",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "点结尾",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "超长120",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "超长300",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "emoji",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "纯空格",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "连续斜杠",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "点开头",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "上跳",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "百分号井号",
+        "code": 0,
+        "msg": ""
+      }
+    ],
+    "titles": [],
+    "diskTree": []
+  },
+  {
+    "name": "4 删除接口签名探测",
+    "ok": true,
+    "removeDocByID": {
+      "code": 0,
+      "msg": "",
+      "data": null,
+      "_ms": 32.4
+    },
+    "removeDoc_notebook_path": {
+      "code": -1,
+      "msg": "block not found",
+      "data": null,
+      "_ms": 4.7
+    },
+    "removeDoc_id_notebook_path": {
+      "code": -1,
+      "msg": "block not found",
+      "data": null,
+      "_ms": 4.4
+    },
+    "left": []
+  },
+  {
+    "name": "5 path 形态容错",
+    "ok": true,
+    "noLeadingSlash": {
+      "code": 0,
+      "msg": "",
+      "data": "20261024154424-wwxhrn2",
+      "_ms": 29.7
+    },
+    "empty": {
+      "code": 0,
+      "msg": "",
+      "data": "20261024154424-c74bw61",
+      "_ms": 29.4
+    },
+    "rootOnly": {
+      "code": 0,
+      "msg": "",
+      "data": "20261024154424-utcqnzl",
+      "_ms": 30.5
+    },
+    "oneLevel": {
+      "code": 0,
+      "msg": "",
+      "data": "20261024154424-q2suo0g",
+      "_ms": 29.6
+    }
+  },
+  {
+    "name": "6 getIDsByHPath 耗时（100 篇后）",
+    "ok": true,
+    "hits": [
+      {
+        "p": "/量/第 1 篇",
+        "ms": 1.9,
+        "n": 1,
+        "code": 0
+      },
+      {
+        "p": "/量/不存在",
+        "ms": 2.2,
+        "n": 0,
+        "code": 0
+      },
+      {
+        "p": "/A/B/C",
+        "ms": 1.4,
+        "n": 1,
+        "code": 0
+      }
+    ]
+  },
+  {
+    "name": "Z 清理",
+    "ok": true,
+    "del": {
+      "code": 0,
+      "msg": "",
+      "data": null,
+      "_ms": 269.8
+    }
+  }
+]

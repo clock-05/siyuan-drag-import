@@ -1,0 +1,157 @@
+[
+  {
+    "name": "A 多级 hpath 的磁盘真相",
+    "ok": true,
+    "resp": {
+      "code": 0,
+      "msg": "",
+      "data": "20261024154339-44vm033",
+      "_ms": 48.2
+    },
+    "sqlAfterWait": [],
+    "disk": [
+      {
+        "file": "/20261024154339-s3t6770/20261024154339-rhgm400/20261024154339-44vm033.sy",
+        "fileSize": 357
+      },
+      {
+        "file": "/20261024154339-s3t6770/20261024154339-rhgm400.sy",
+        "fileSize": 302
+      },
+      {
+        "file": "/20261024154339-s3t6770.sy",
+        "fileSize": 302
+      }
+    ]
+  },
+  {
+    "name": "B 重复 hpath 的去重与查询",
+    "ok": true,
+    "first": "20261024154340-tcts7my",
+    "second": "20261024154340-juazs4r",
+    "idsByHPath": [
+      "20261024154340-tcts7my",
+      "20261024154340-juazs4r"
+    ],
+    "disk": []
+  },
+  {
+    "name": "C 命名边界真实落地名",
+    "ok": true,
+    "resp": [
+      {
+        "label": "首尾空格",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "冒号",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "反斜杠",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "问号星号",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "尖括号竖线",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "点结尾",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "超长 120",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "超长 300",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "emoji",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "纯空格",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "连续斜杠",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "点开头",
+        "code": 0,
+        "msg": ""
+      },
+      {
+        "label": "../穿越",
+        "code": 0,
+        "msg": ""
+      }
+    ],
+    "disk": []
+  },
+  {
+    "name": "D removeDoc 带 notebook 参数",
+    "ok": true,
+    "created": "20261024154343-finfjet",
+    "del": {
+      "code": -1,
+      "msg": "Field [path] is required",
+      "data": null,
+      "_ms": 1.2
+    },
+    "stillOnDisk": []
+  },
+  {
+    "name": "E 同名不同内容的资源上传",
+    "ok": true,
+    "a": {
+      "same.png": "assets/same-20261024154344-4ug20oy.png"
+    },
+    "b": {
+      "same.png": "assets/same-20261024154344-odn2zvb.png"
+    },
+    "cIdenticalContentAgain": {
+      "same.png": "assets/same-20261024154344-7uxep3v.png"
+    },
+    "assetsOnDisk": [
+      "same-20261024154344-4ug20oy.png",
+      "same-20261024154344-7uxep3v.png",
+      "same-20261024154344-odn2zvb.png"
+    ]
+  },
+  {
+    "name": "F 重复导入同一层级的稳定性",
+    "ok": true,
+    "r1": 0,
+    "r2": 0,
+    "disk": []
+  },
+  {
+    "name": "Z 清理",
+    "ok": true,
+    "del": {
+      "code": 0,
+      "msg": "",
+      "data": null,
+      "_ms": 49
+    }
+  }
+]

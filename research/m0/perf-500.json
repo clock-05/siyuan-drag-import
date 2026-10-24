@@ -1,0 +1,33 @@
+{
+  "total": 500,
+  "errors": 0,
+  "totalMs": 16286,
+  "avgMs": 32.6,
+  "perSec": 30.7,
+  "buckets": [
+    {
+      "done": 100,
+      "avgMs": 33.4
+    },
+    {
+      "done": 200,
+      "avgMs": 32.8
+    },
+    {
+      "done": 300,
+      "avgMs": 32.4
+    },
+    {
+      "done": 400,
+      "avgMs": 32.5
+    },
+    {
+      "done": 500,
+      "avgMs": 32.6
+    }
+  ],
+  "getIDsByHPathMs": 2.3,
+  "getIDsByHPathRows": 1,
+  "sqlDocCount": 468,
+  "sqlMs": 2.2
+}

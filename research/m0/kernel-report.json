@@ -1,0 +1,324 @@
+[
+  {
+    "name": "00 创建临时笔记本",
+    "ok": true,
+    "nbId": "20261024154251-m67rfr4",
+    "nbName": "M0-verify-771825",
+    "resp": {
+      "code": 0,
+      "msg": "",
+      "data": {
+        "notebook": {
+          "id": "20261024154251-m67rfr4",
+          "name": "M0-verify-771825",
+          "icon": "",
+          "sort": 7,
+          "sortMode": 15,
+          "closed": false,
+          "subFileCount": 0,
+          "newFlashcardCount": 0,
+          "dueFlashcardCount": 0,
+          "flashcardCount": 0,
+          "encrypted": false,
+          "unlocked": false
+        }
+      },
+      "_ms": 77.7
+    }
+  },
+  {
+    "name": "01 多级 hpath 自动补建父文档",
+    "ok": true,
+    "resp": {
+      "code": 0,
+      "msg": "",
+      "data": "20261024154251-1oe5pk2",
+      "_ms": 46
+    },
+    "docsInNotebook": [],
+    "note": "若只出现 /L1/L2/L3 一条，说明父层级是隐式的；若出现 L1、L1/L2、L1/L2/L3 三条，说明自动补建"
+  },
+  {
+    "name": "02 同一 hpath 重复创建两次",
+    "ok": true,
+    "first": {
+      "code": 0,
+      "msg": "",
+      "data": "20261024154251-9tkiks3",
+      "_ms": 41.2
+    },
+    "second": {
+      "code": 0,
+      "msg": "",
+      "data": "20261024154251-29v0r9r",
+      "_ms": 30.9
+    },
+    "matched": []
+  },
+  {
+    "name": "03 getIDsByHPath 查已存在路径",
+    "ok": true,
+    "hit": {
+      "code": 0,
+      "msg": "",
+      "data": [
+        "20261024154251-1oe5pk2"
+      ],
+      "_ms": 3.3
+    },
+    "miss": {
+      "code": 0,
+      "msg": "",
+      "data": [],
+      "_ms": 2.5
+    }
+  },
+  {
+    "name": "04 复用已存在的父文档继续建子文档",
+    "ok": true,
+    "resp": {
+      "code": 0,
+      "msg": "",
+      "data": "20261024154252-bh3hpy6",
+      "_ms": 32.8
+    },
+    "docs": []
+  },
+  {
+    "name": "05 命名边界：空格/非法字符/超长/emoji/空名",
+    "ok": true,
+    "out": [
+      {
+        "label": "首尾空格",
+        "path": "/边界/  带空格的名字  ",
+        "code": 0,
+        "msg": "",
+        "id": "20261024154252-jmznegq",
+        "ms": 36.9
+      },
+      {
+        "label": "冒号",
+        "path": "/边界/带:冒号",
+        "code": 0,
+        "msg": "",
+        "id": "20261024154252-0fn9c4o",
+        "ms": 28.9
+      },
+      {
+        "label": "反斜杠",
+        "path": "/边界/带\\反斜杠",
+        "code": 0,
+        "msg": "",
+        "id": "20261024154252-fdpueso",
+        "ms": 28.4
+      },
+      {
+        "label": "问号星号",
+        "path": "/边界/带?问号*星号",
+        "code": 0,
+        "msg": "",
+        "id": "20261024154252-agbnrj2",
+        "ms": 29.1
+      },
+      {
+        "label": "点结尾",
+        "path": "/边界/以点结尾.",
+        "code": 0,
+        "msg": "",
+        "id": "20261024154252-k94x55d",
+        "ms": 29.1
+      },
+      {
+        "label": "超长120",
+        "path": "/边界/长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长长",
+        "code": 0,
+        "msg": "",
+        "id": "20261024154252-vbtu0xg",
+        "ms": 27.6
+      },
+      {
+        "label": "emoji",
+        "path": "/边界/🎉 庆祝一下",
+        "code": 0,
+        "msg": "",
+        "id": "20261024154252-817qus3",
+        "ms": 30.7
+      },
+      {
+        "label": "中日韩混排",
+        "path": "/边界/한글とカタカナと汉字",
+        "code": 0,
+        "msg": "",
+        "id": "20261024154252-kjco29y",
+        "ms": 29.3
+      },
+      {
+        "label": "单斜杠结尾",
+        "path": "/边界/斜杠结尾/",
+        "code": 0,
+        "msg": "",
+        "id": "20261024154252-m2d72ng",
+        "ms": 43.8
+      },
+      {
+        "label": "纯空格",
+        "path": "/边界/   ",
+        "code": 0,
+        "msg": "",
+        "id": "20261024154252-adig17y",
+        "ms": 30.5
+      },
+      {
+        "label": "点开头的隐藏名",
+        "path": "/边界/.gitignore",
+        "code": 0,
+        "msg": "",
+        "id": "20261024154252-zgcvgq0",
+        "ms": 28.2
+      }
+    ],
+    "docs": []
+  },
+  {
+    "name": "06 markdown 原样落库能力",
+    "ok": true,
+    "resp": {
+      "code": 0,
+      "msg": "",
+      "data": "20261024154252-kyfjzbs",
+      "_ms": 38.6
+    },
+    "kramdown": "---\n{: id=\"20261024154252-vi4usci\" updated=\"20261024154252\"}\n\ntitle: 前端表格\ntags: [a, b]\n{: id=\"20261024154252-w9mu2n7\" updated=\"20261024154252\"}\n\n---\n{: id=\"20261024154252-fwbdek0\" updated=\"20261024154252\"}\n\n## 表格\n{: id=\"20261024154252-4en0fkg\" updated=\"20261024154252\"}\n\n|列1|列2|\n| -----| -----|\n|1|2|\n{: id=\"20261024154252-173j72k\" updated=\"20261024154252\" colgroup=\"|\"}\n\n> [!note] 提示\n> callout 内容\n> {: id=\"20261024154252-c71zdl1\" updated=\"20261024154252\"}\n>\n{: id=\"20261024154252-snhf7l1\" updated=\"20261024154252\"}\n\n<div>\n<div style=\"color:red\">内联 HTML</div>\n{: id=\"20261024154252-6ejss2i\" updated=\"20261024154252\"}\n\n$E=mc^2$\n{: id=\"20261024154252-ifjcanh\" updated=\"20261024154252\"}\n\n{: id=\"20261024154252-kyfjzbs\" updated=\"20261024154252\" type=\"doc\" title=\"frontmatter 与语法\"}"
+  },
+  {
+    "name": "07 /api/asset/upload 上传与同名处理",
+    "ok": true,
+    "first": {
+      "name": "probe.png",
+      "code": 0,
+      "msg": "",
+      "data": {
+        "errFiles": null,
+        "failedFiles": [],
+        "succFiles": [
+          {
+            "index": 0,
+            "name": "probe.png",
+            "path": "assets/probe-20261024154252-wilh39u.png"
+          }
+        ],
+        "succMap": {
+          "probe.png": "assets/probe-20261024154252-wilh39u.png"
+        }
+      },
+      "_ms": 10.9
+    },
+    "second": {
+      "name": "probe.png",
+      "code": 0,
+      "msg": "",
+      "data": {
+        "errFiles": null,
+        "failedFiles": [],
+        "succFiles": [
+          {
+            "index": 0,
+            "name": "probe.png",
+            "path": "assets/probe-20261024154252-wilh39u.png"
+          }
+        ],
+        "succMap": {
+          "probe.png": "assets/probe-20261024154252-wilh39u.png"
+        }
+      },
+      "_ms": 2.4
+    },
+    "chinese": {
+      "name": "中文图片名.png",
+      "code": 0,
+      "msg": "",
+      "data": {
+        "errFiles": null,
+        "failedFiles": [],
+        "succFiles": [
+          {
+            "index": 0,
+            "name": "中文图片名.png",
+            "path": "assets/中文图片名-20261024154252-pvwk2s4.png"
+          }
+        ],
+        "succMap": {
+          "中文图片名.png": "assets/中文图片名-20261024154252-pvwk2s4.png"
+        }
+      },
+      "_ms": 7.5
+    }
+  },
+  {
+    "name": "08 removeDoc 删除并确认",
+    "ok": true,
+    "created": {
+      "code": 0,
+      "msg": "",
+      "data": "20261024154252-yufgab2",
+      "_ms": 41.3
+    },
+    "removeResp": {
+      "code": -1,
+      "msg": "Field [notebook] is required",
+      "data": null,
+      "_ms": 1.8
+    },
+    "after": []
+  },
+  {
+    "name": "09 连续建 100 篇耗时分布",
+    "ok": true,
+    "count": 100,
+    "totalMs": 3133,
+    "avgMs": 31.3,
+    "p50": 31.2,
+    "p95": 34.8,
+    "max": 39.4,
+    "perSec": 31.9
+  },
+  {
+    "name": "10 目标笔记本被关闭时的行为",
+    "ok": true,
+    "close": {
+      "code": 0,
+      "msg": "",
+      "data": null,
+      "_ms": 8.3
+    },
+    "afterClose": {
+      "code": -1,
+      "msg": "查询笔记本失败",
+      "data": null,
+      "_ms": 3.1
+    },
+    "open": {
+      "code": 0,
+      "msg": "",
+      "data": null,
+      "_ms": 18.6
+    },
+    "afterOpen": {
+      "code": 0,
+      "msg": "",
+      "data": "20261024154255-kuzh0bi",
+      "_ms": 41.3
+    }
+  },
+  {
+    "name": "99 清理临时笔记本",
+    "ok": true,
+    "del": {
+      "code": 0,
+      "msg": "",
+      "data": null,
+      "_ms": 227.8
+    },
+    "nbId": "20261024154251-m67rfr4"
+  }
+]

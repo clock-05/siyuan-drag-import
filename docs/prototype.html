@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>拖拽导入 · 交互原型</title>
+<style>
+  :root{
+    --primary:#3575f0;
+    --primary-04:rgba(53,117,240,.045);
+    --primary-08:rgba(53,117,240,.08);
+    --primary-12:rgba(53,117,240,.12);
+    --bg:#ffffff;
+    --surface:#f7f8fa;
+    --surface-2:#f2f3f5;
+    --line:#e8eaed;
+    --text:#1f2329;
+    --text-2:#6d747e;
+    --text-3:#9aa2ac;
+    --ok:#1f9d55;
+    --warn:#c47d10;
+    --err:#d93a3a;
+    --shadow-card:0 6px 24px rgba(15,23,42,.10), 0 1px 3px rgba(15,23,42,.06);
+    --shadow-pop:0 4px 14px rgba(15,23,42,.14);
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{height:100%}
+  body{
+    margin:0;background:#eceef1;color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+    font-size:13px;display:flex;flex-direction:column;align-items:center;
+    padding:28px 24px 40px;
+  }
+
+  /* ---------- 顶部说明 ---------- */
+  .head{width:min(1240px,96vw);display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:14px;flex-wrap:wrap}
+  .head h1{font-size:17px;font-weight:600;margin:0 0 4px;letter-spacing:.2px}
+  .head p{margin:0;font-size:12.5px;color:#5d646d;line-height:1.6}
+  .tabs{display:flex;gap:4px;background:#e2e5e9;padding:3px;border-radius:9px}
+  .tab{
+    border:0;background:transparent;font:inherit;font-size:12.5px;color:#545b64;
+    padding:6px 13px;border-radius:7px;cursor:pointer;transition:.16s;white-space:nowrap;
+  }
+  .tab:hover{color:#1f2329}
+  .tab.on{background:#fff;color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.10);font-weight:500}
+
+  /* ---------- 窗口 ---------- */
+  .win{
+    width:min(1240px,96vw);height:660px;background:var(--bg);border-radius:10px;overflow:hidden;
+    box-shadow:0 12px 40px rgba(15,23,42,.14), 0 0 0 1px rgba(15,23,42,.06);
+    display:flex;flex-direction:column;position:relative;
+  }
+  .titlebar{
+    height:38px;flex:none;display:flex;align-items:center;gap:10px;padding:0 12px;
+    border-bottom:1px solid var(--line);background:var(--surface);
+  }
+  .dot{width:10px;height:10px;border-radius:50%;background:#d7dbe0}
+  .titlebar .name{font-size:12.5px;color:var(--text-2);margin-left:6px}
+  .titlebar .spacer{flex:1}
+  .win-body{flex:1;display:flex;min-height:0}
+
+  /* dock */
+  .dock{
+    width:44px;flex:none;background:var(--surface);border-right:1px solid var(--line);
+    display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:6px;
+  }
+  .dock .ic{
+    width:28px;height:28px;border-radius:6px;display:grid;place-items:center;color:#8b939d;
+  }
+  .dock .ic.on{background:#e8ebef;color:#3b4149}
+  .dock .ic svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+  /* tree */
+  .tree{
+    width:258px;flex:none;background:var(--surface);border-right:1px solid var(--line);
+    display:flex;flex-direction:column;position:relative;transition:background .18s;
+  }
+  .tree-head{
+    height:34px;flex:none;display:flex;align-items:center;padding:0 10px;gap:6px;
+    font-size:12px;color:var(--text-2);border-bottom:1px solid rgba(0,0,0,.04);
+  }
+  .tree-head .acts{margin-left:auto;display:flex;gap:8px;color:#a3aab3;font-size:14px;line-height:1}
+  .tree-list{flex:1;overflow:hidden;padding:6px 6px 40px}
+  .row{
+    height:26px;display:flex;align-items:center;gap:5px;padding:0 6px;border-radius:5px;
+    color:#3a4048;font-size:13px;white-space:nowrap;overflow:hidden;position:relative;
+  }
+  .row .arw{width:10px;color:#aab1ba;font-size:9px;flex:none;text-align:center}
+  .row .fi{width:14px;flex:none;color:#8d949e;display:grid;place-items:center}
+  .row .fi svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+  .row .tx{overflow:hidden;text-overflow:ellipsis}
+  .row .cnt{margin-left:auto;font-size:11px;color:var(--text-3);flex:none}
+  .row.sel{background:#e6e9ed;font-weight:500;color:#1f2329}
+  .row.sub{padding-left:22px}
+  .row.sub2{padding-left:40px}
+  .row.nb{font-weight:500;color:#2c323a}
+  .gap{height:6px}
+
+  /* ---------- 场景 1：拖拽悬停 ---------- */
+  [data-scene="1"] .tree{background:var(--primary-04)}
+  [data-scene="1"] .tree::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    box-shadow:inset 0 0 0 2px var(--primary);
+  }
+  [data-scene="1"] .row.drop-target{
+    box-shadow:inset 0 0 0 1.5px var(--primary);
+    background:var(--primary-08);
+  }
+  [data-scene="1"] .row.drop-target::after{
+    content:"";position:absolute;left:4px;right:4px;bottom:-1px;height:2px;background:var(--primary);border-radius:2px;
+  }
+  .tree{z-index:2}
+  .drop-banner,.ghost,.cursor{z-index:12}
+  .drop-banner{
+    position:absolute;left:8px;right:8px;top:40px;z-index:12;
+    background:var(--primary);color:#fff;border-radius:6px;padding:7px 9px;
+    box-shadow:0 4px 12px rgba(53,117,240,.32);
+    display:flex;align-items:center;gap:7px;
+  }
+  [data-scene="1"] .tree-list{padding-top:48px}
+  .drop-banner .t{font-size:12px;font-weight:500;line-height:1.35}
+  .drop-banner .t b{font-weight:600}
+  .drop-banner .k{
+    margin-left:auto;flex:none;font-size:11px;background:rgba(255,255,255,.20);
+    padding:2px 6px;border-radius:4px;white-space:nowrap;
+  }
+  .drop-banner svg{width:14px;height:14px;flex:none;stroke:#fff;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+  /* 拖拽幽灵 */
+  .ghost{
+    position:absolute;z-index:9;left:258px;top:238px;
+    background:#fff;border-radius:7px;padding:7px 10px 7px 8px;
+    display:flex;align-items:center;gap:7px;box-shadow:var(--shadow-pop);
+    transform:rotate(-1.4deg);pointer-events:none;border:1px solid #e3e6ea;
+  }
+  .ghost .fi{width:20px;height:20px;flex:none;border-radius:4px;background:var(--primary-08);display:grid;place-items:center;color:var(--primary)}
+  .ghost .fi svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linejoin:round}
+  .ghost .nm{font-size:12px;font-weight:500;color:#2b3138}
+  .ghost .ft{font-size:10.5px;color:var(--text-3);margin-top:1px}
+  .cursor{
+    position:absolute;z-index:10;left:234px;top:222px;pointer-events:none;
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,.35));
+  }
+  .cursor svg{width:17px;height:22px}
+
+  /* ---------- 编辑器 ---------- */
+  .editor{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--bg);position:relative}
+  .ed-top{height:34px;flex:none;display:flex;align-items:center;padding:0 16px;gap:10px;border-bottom:1px solid var(--line)}
+  .crumb{font-size:12px;color:var(--text-3)}
+  .crumb b{color:var(--text-2);font-weight:500}
+  .ed-top .right{margin-left:auto;display:flex;gap:12px;color:#b3b9c1;font-size:12px}
+  .ed-body{padding:34px 56px;overflow:hidden}
+  .doc-title{font-size:26px;font-weight:650;letter-spacing:.2px;margin:0 0 18px}
+  .doc-h{font-size:15px;font-weight:600;margin:24px 0 8px}
+  .doc-p{font-size:14px;line-height:1.85;color:#33393f;margin:0 0 10px;max-width:640px}
+  .doc-p code{background:#f1f2f4;border-radius:3px;padding:1px 4px;font-size:12.5px;font-family:ui-monospace,Consolas,monospace}
+  .doc-quote{border-left:3px solid #e0e3e7;padding-left:12px;color:#5f666e;font-size:13.5px;line-height:1.8;margin:14px 0}
+  .ph{height:9px;border-radius:4px;background:linear-gradient(90deg,#f0f1f3,#f6f7f8);margin:10px 0;max-width:600px}
+
+  /* ---------- 卡片通用 ---------- */
+  .card{
+    position:absolute;right:20px;bottom:20px;width:364px;background:#fff;border-radius:9px;
+    box-shadow:var(--shadow-card);border:1px solid var(--line);overflow:hidden;z-index:20;
+    opacity:0;transform:translateY(10px) scale(.99);transition:.22s cubic-bezier(.2,.8,.3,1);pointer-events:none;
+  }
+  [data-scene="2"] .card.progress,[data-scene="3"] .card.summary{opacity:1;transform:none;pointer-events:auto}
+
+  .card-head{display:flex;align-items:center;gap:8px;padding:11px 12px;border-bottom:1px solid var(--line)}
+  .card-head .ttl{font-size:13px;font-weight:600}
+  .card-head .sub{font-size:11.5px;color:var(--text-3);margin-left:2px}
+  .card-head .x{margin-left:0;color:#aab1ba;font-size:15px;line-height:1;cursor:default}
+  .card-head .fold{margin-left:auto;color:#aab1ba;font-size:11px}
+
+  .card.summary .card-head .x{margin-left:auto}
+  /* 进度卡片 */
+  .pg-body{padding:12px 12px 10px}
+  .pg-file{display:flex;align-items:baseline;gap:6px;font-size:12.5px;color:#2f353c;margin-bottom:9px}
+  .pg-file .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pg-file .num{margin-left:auto;font-size:11.5px;color:var(--text-3);flex:none;font-variant-numeric:tabular-nums}
+  .bar{height:4px;border-radius:2px;background:#edeff2;overflow:hidden}
+  .bar > i{display:block;height:100%;width:25%;border-radius:2px;background:var(--primary);transition:width .4s}
+  .pg-meta{display:flex;align-items:center;gap:8px;margin-top:9px;font-size:11.5px;color:var(--text-3)}
+  .pg-meta .stage{color:var(--primary);font-weight:500}
+  .pg-foot{display:flex;align-items:center;padding:0 12px 11px}
+  .btn-txt{
+    border:0;background:transparent;font:inherit;font-size:12px;color:var(--text-2);
+    padding:4px 8px;border-radius:5px;cursor:pointer;
+  }
+  .btn-txt:hover{background:#f2f3f5;color:var(--text)}
+  .btn-txt.danger:hover{background:#fdeeee;color:var(--err)}
+  .pg-foot .count{margin-left:auto;font-size:11.5px;color:var(--text-3);font-variant-numeric:tabular-nums}
+
+  /* 结果卡片 */
+  .rs-body{padding:12px}
+  .rs-line{display:flex;align-items:center;gap:7px;font-size:12.5px;margin-bottom:12px}
+  .rs-badge{display:inline-flex;align-items:center;gap:5px;background:#eaf7ef;color:var(--ok);font-weight:600;font-size:12.5px;padding:3px 8px;border-radius:5px}
+  .rs-badge svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .rs-stats{margin-left:auto;font-size:11.5px;color:var(--text-3);font-variant-numeric:tabular-nums}
+  .rs-stats b{font-weight:600;color:var(--text-2)}
+  .rs-list{border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .rs-item{display:flex;align-items:center;gap:8px;padding:7px 9px;font-size:12px;border-bottom:1px solid #f0f1f3}
+  .rs-item:last-child{border-bottom:0}
+  .rs-item .dot2{width:5px;height:5px;border-radius:50%;flex:none}
+  .rs-item .f{color:#2f353c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rs-item .r{margin-left:auto;color:var(--text-3);font-size:11.5px;flex:none;padding-left:8px}
+  .rs-item.err .dot2{background:var(--err)}
+  .rs-item.skip .dot2{background:#c9ced6}
+  .rs-more{text-align:center;font-size:11.5px;color:var(--text-3);padding:6px 0 0}
+  .rs-foot{display:flex;align-items:center;gap:6px;padding:10px 12px;border-top:1px solid var(--line);background:#fcfcfd}
+  .btn{
+    border:1px solid var(--line);background:#fff;font:inherit;font-size:12px;color:#3a4048;
+    padding:5px 10px;border-radius:5px;cursor:pointer;transition:.15s;
+  }
+  .btn:hover{background:#f6f7f8}
+  .btn.pri{background:var(--primary);border-color:var(--primary);color:#fff}
+  .btn.pri:hover{background:#2b66db}
+  .rs-foot .undo{margin-left:auto;color:var(--text-2);display:inline-flex;align-items:center;gap:4px}
+  .rs-foot .undo span{font-size:11px;color:var(--text-3);font-variant-numeric:tabular-nums}
+
+  /* 场景显示控制 */
+  .scene{display:none}
+  [data-scene="1"] .scene-1,[data-scene="2"] .scene-2,[data-scene="3"] .scene-3{display:block}
+  .note{width:min(1240px,96vw);margin-top:12px;font-size:12px;color:#6c737c;line-height:1.7}
+  .note b{color:#3f464e;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div>
+    <h1>拖拽导入 · 三个关键界面</h1>
+    <p>从资源管理器拖入 → 投放提示 → 进度 → 结果。卡片均不遮挡文档树与正文。</p>
+  </div>
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-t="1">① 拖拽悬停</button>
+    <button class="tab" data-t="2">② 导入进度</button>
+    <button class="tab" data-t="3">③ 结果汇总</button>
+  </div>
+</div>
+
+<div class="win" id="win" data-scene="1">
+  <div class="titlebar">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="name">思源笔记 — 知识库</div>
+    <div class="spacer"></div>
+  </div>
+
+  <div class="win-body">
+    <!-- dock -->
+    <aside class="dock">
+      <div class="ic on"><svg viewBox="0 0 24 24"><path d="M4 5h6l2 2h8v12H4z"/></svg></div>
+      <div class="ic"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></div>
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M20 12l-8 8-8-8 8-8z"/></svg></div>
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M6 4h12v16l-6-4-6 4z"/></svg></div>
+    </aside>
+
+    <!-- 文档树 -->
+    <aside class="tree" id="tree">
+      <div class="tree-head">
+        <span>文档树</span>
+        <span class="acts">＋ ⌕ ⋯</span>
+      </div>
+      <div class="tree-list">
+        <div class="row nb"><span class="arw">▾</span><span class="fi"><svg viewBox="0 0 24 24"><path d="M4 5h6l2 2h8v12H4z"/></svg></span><span class="tx">知识库</span><span class="cnt">28</span></div>
+        <div class="row sub"><span class="fi"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg></span><span class="tx">产品设计</span></div>
+        <div class="row sub drop-target"><span class="fi"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg></span><span class="tx">导入流程</span></div>
+        <div class="row sub2"><span class="fi"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg></span><span class="tx">需求记录</span></div>
+        <div class="row sub"><span class="fi"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg></span><span class="tx">会议纪要</span></div>
+        <div class="gap"></div>
+        <div class="row nb"><span class="arw">▸</span><span class="fi"><svg viewBox="0 0 24 24"><path d="M4 5h6l2 2h8v12H4z"/></svg></span><span class="tx">读书笔记</span><span class="cnt">12</span></div>
+        <div class="row nb"><span class="arw">▸</span><span class="fi"><svg viewBox="0 0 24 24"><path d="M4 5h6l2 2h8v12H4z"/></svg></span><span class="tx">剪藏</span><span class="cnt">64</span></div>
+        <div class="row nb"><span class="arw">▸</span><span class="fi"><svg viewBox="0 0 24 24"><path d="M4 5h6l2 2h8v12H4z"/></svg></span><span class="tx">项目归档</span><span class="cnt">7</span></div>
+      </div>
+
+      <!-- 场景1：投放提示 -->
+      <div class="scene scene-1">
+        <div class="drop-banner">
+          <svg viewBox="0 0 24 24"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 16v3h16v-3"/></svg>
+          <div class="t">释放以导入到 <b>「知识库」</b></div>
+          <div class="k">文件夹</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 编辑器 -->
+    <main class="editor">
+      <div class="ed-top">
+        <div class="crumb">知识库 / <b>产品设计</b></div>
+        <div class="right"><span>⋯</span></div>
+      </div>
+      <div class="ed-body">
+        <h1 class="doc-title">导入流程</h1>
+        <div class="doc-h">背景</div>
+        <p class="doc-p">从资源管理器把 Markdown 搬进思源，目前要走 <code>设置 → 导入</code> 再逐层选路径，一次只能处理一层。日常整理资料时，这个成本高到让人干脆放弃。</p>
+        <div class="ph" style="width:520px"></div>
+        <div class="ph" style="width:466px"></div>
+        <div class="doc-h">目标</div>
+        <p class="doc-p">拖一次，得到一棵和磁盘完全一致的文档树。</p>
+        <div class="doc-quote">目录层级不拍平；重名不丢失；失败不静默。</div>
+        <div class="ph" style="width:580px"></div>
+        <div class="ph" style="width:410px"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 场景1：拖拽幽灵 + 光标 -->
+  <div class="scene scene-1">
+    <div class="ghost">
+      <div class="fi"><svg viewBox="0 0 24 24"><path d="M3 6h6l2 2h10v11H3z"/></svg></div>
+      <div>
+        <div class="nm">项目A</div>
+        <div class="ft">文件夹</div>
+      </div>
+    </div>
+    <div class="cursor">
+      <svg viewBox="0 0 15 20"><path d="M1 1l1 16 4-4.6 3 4.6 2.2-1.4-3-4.5H13z" fill="#fff" stroke="#1f2329" stroke-width="1.1" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+
+  <!-- 场景2：进度卡片 -->
+  <div class="card progress">
+    <div class="card-head">
+      <span class="ttl">正在导入 48 篇</span>
+      <span class="sub">项目A</span>
+      <span class="fold">▾</span>
+      <span class="x">✕</span>
+    </div>
+    <div class="pg-body">
+      <div class="pg-file">
+        <span class="nm">03-设计稿定稿.md</span>
+        <span class="num">12 / 48</span>
+      </div>
+      <div class="bar"><i></i></div>
+      <div class="pg-meta">
+        <span class="stage">正在建文档</span>
+        <span>·</span>
+        <span>已完成 23%</span>
+        <span>·</span>
+        <span>预计 6 秒</span>
+      </div>
+    </div>
+    <div class="pg-foot">
+      <button class="btn-txt danger">取消导入</button>
+      <span class="count">关闭窗口不中断导入</span>
+    </div>
+  </div>
+
+  <!-- 场景3：结果卡片 -->
+  <div class="card summary">
+    <div class="card-head">
+      <span class="ttl">导入完成</span>
+      <span class="x">✕</span>
+    </div>
+    <div class="rs-body">
+      <div class="rs-line">
+        <span class="rs-badge">
+          <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+          成功导入 45 篇
+        </span>
+        <span class="rs-stats">跳过 <b>2</b> · 失败 <b>1</b></span>
+      </div>
+      <div class="rs-list">
+        <div class="rs-item err">
+          <span class="dot2"></span>
+          <span class="f">项目A/spec.md</span>
+          <span class="r">文档名过长，已跳过</span>
+        </div>
+        <div class="rs-item skip">
+          <span class="dot2"></span>
+          <span class="f">项目A/cover.png</span>
+          <span class="r">非 Markdown</span>
+        </div>
+        <div class="rs-item skip">
+          <span class="dot2"></span>
+          <span class="f">__MACOSX/._a.md</span>
+          <span class="r">系统文件</span>
+        </div>
+      </div>
+      <div class="rs-more">共扫描 48 项 · 用时 6.2 秒 · 已存入「知识库 / 产品设计」</div>
+    </div>
+    <div class="rs-foot">
+      <button class="btn pri">打开第一篇</button>
+      <button class="btn">查看日志</button>
+      <button class="btn-txt undo">撤销<span>04:58</span></button>
+    </div>
+  </div>
+</div>
+
+<div class="note" id="hint">
+  <span class="scene scene-1" style="display:block">悬停阶段只显示来源类型，不显示文件数量 —— 遍历目录会拖慢 dragover，数量留到释放后的扫描阶段。</span>
+  <span class="scene scene-2" style="display:none">进度分母是「文件数」而非字节数；单篇耗时 &gt; 800ms 才显示文件名，短任务不闪。</span>
+  <span class="scene scene-3" style="display:none">撤销只删本批次创建的文档 id，且只在 5 分钟内有效；过了就置灰，避免误删别人后来的修改。</span>
+</div>
+
+<script>
+  const win = document.getElementById('win');
+  const tabs = document.getElementById('tabs');
+  function show(t){
+    win.dataset.scene = t;
+    [...tabs.children].forEach(x => x.classList.toggle('on', x.dataset.t === t));
+    document.querySelectorAll('.note .scene').forEach(s => s.style.display = 'none');
+    document.querySelector('.note .scene-' + t).style.display = 'block';
+    history.replaceState(null, '', '#' + t);
+  }
+  tabs.addEventListener('click', (e) => {
+    const b = e.target.closest('.tab');
+    if (b) show(b.dataset.t);
+  });
+  const h = (location.hash || '').replace('#', '');
+  if (h === '2' || h === '3') show(h);
+</script>
+</body>
+</html>

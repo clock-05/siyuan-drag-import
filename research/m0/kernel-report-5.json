@@ -1,0 +1,132 @@
+[
+  {
+    "name": "1 listDocsByPath 参数形态",
+    "ok": true,
+    "rootFileObj": {
+      "path": "/20261024154619-g193ih7.sy",
+      "name": "L",
+      "icon": "",
+      "name1": "",
+      "alias": "",
+      "memo": "",
+      "bookmark": "",
+      "id": "20261024154619-g193ih7",
+      "count": 0,
+      "size": 301,
+      "hSize": "301 B",
+      "mtime": 1792827979,
+      "ctime": 1792827979,
+      "hMtime": "2026-10-24 15:46:19, 1 秒前",
+      "hCtime": "2026-10-24 15:46:19, 1 秒前",
+      "sort": 0,
+      "subFileCount": 1,
+      "childrenSortMode": null,
+      "newFlashcardCount": 0,
+      "dueFlashcardCount": 0,
+      "flashcardCount": 0
+    },
+    "parentDocObj": {
+      "path": "/20261024154619-g193ih7.sy",
+      "name": "L",
+      "icon": "",
+      "name1": "",
+      "alias": "",
+      "memo": "",
+      "bookmark": "",
+      "id": "20261024154619-g193ih7",
+      "count": 0,
+      "size": 301,
+      "hSize": "301 B",
+      "mtime": 1792827979,
+      "ctime": 1792827979,
+      "hMtime": "2026-10-24 15:46:19, 1 秒前",
+      "hCtime": "2026-10-24 15:46:19, 1 秒前",
+      "sort": 0,
+      "subFileCount": 1,
+      "childrenSortMode": null,
+      "newFlashcardCount": 0,
+      "dueFlashcardCount": 0,
+      "flashcardCount": 0
+    },
+    "byStorage_files": [
+      {
+        "name": "父",
+        "path": "/20261024154619-g193ih7/20261024154619-qkgqkwz.sy",
+        "id": "20261024154619-qkgqkwz",
+        "subFileCount": 2
+      }
+    ],
+    "grandchildren_files": [
+      "子一",
+      "子二"
+    ],
+    "createdParentId": "20261024154619-qkgqkwz"
+  },
+  {
+    "name": "2 getHPathByID",
+    "ok": true,
+    "id": "20261024154620-8kah7tr",
+    "resp": {
+      "code": 0,
+      "msg": "",
+      "data": "/路径/深层/文档",
+      "_ms": 15.2
+    }
+  },
+  {
+    "name": "3 删除父文档的连带行为",
+    "ok": true,
+    "parentId": "20261024154620-yamytcl",
+    "children": [
+      "20261024154620-bms1vlf",
+      "20261024154620-2m0tcw9"
+    ],
+    "before": [],
+    "del": {
+      "code": 0,
+      "msg": "",
+      "data": null,
+      "_ms": 31
+    },
+    "afterSql": [],
+    "childAAfter": {
+      "code": -1,
+      "msg": "tree not found",
+      "data": null,
+      "_ms": 1.8
+    },
+    "childBAfter": {
+      "code": -1,
+      "msg": "tree not found",
+      "data": null,
+      "_ms": 1.1
+    }
+  },
+  {
+    "name": "4 标题转义对 hpath 匹配的影响",
+    "ok": true,
+    "raw": [
+      "20261024154622-ltrfgq1"
+    ],
+    "escaped": [],
+    "hPathById": "/转义/带<尖>括"
+  },
+  {
+    "name": "5 新建父文档的可查性（同批次内）",
+    "ok": true,
+    "ms": 1.5,
+    "ids": [
+      "20261024154623-3hf2n2v"
+    ]
+  },
+  {
+    "name": "Z 清理",
+    "ok": true,
+    "del": {
+      "code": 0,
+      "msg": "",
+      "data": null,
+      "_ms": 50.9
+    }
+  }
+]
