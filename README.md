@@ -8,9 +8,10 @@
 |---|---|---|
 | 设计 | 功能设计 + 三态交互原型 | ✅ 已完成 |
 | M0 | 7 项技术验证（内核行为 + 渲染层源码） | ✅ 已完成 |
-| M1 | 单个 md 拖入 → 建文档 → 结果卡片 | 待开始 |
+| M1 | 单个 md 拖入 → 建文档 → 结果卡片 | 待开始，任务见 [`docs/M1-PLAN.md`](docs/M1-PLAN.md) |
 
 技术验证结论与设计修正见 [`docs/M0-VERIFY.md`](docs/M0-VERIFY.md)；功能设计见 [`docs/DESIGN.md`](docs/DESIGN.md)。
+**开新会话做 M1 时，先读 [`docs/M1-PLAN.md`](docs/M1-PLAN.md) 第 0 节的启动提示词。**
 
 ## 目录
 
@@ -18,6 +19,7 @@
 docs/            设计与验证文档
   DESIGN.md        功能设计（v0.2，已按 M0 结论修订）
   M0-VERIFY.md     7 项验证的方法、实测结果、设计影响
+  M1-PLAN.md       M1 任务分解 + 新会话启动提示词
   prototype.html   三态交互原型（浏览器直接打开）
 research/m0/     M0 验证脚本与原始输出
 ```
