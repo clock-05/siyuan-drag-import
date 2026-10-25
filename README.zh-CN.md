@@ -21,7 +21,7 @@
 
 手动：从最新 Release 下载 `package.zip`，解压到 `<工作空间>/data/plugins/siyuan-drag-import/`，重启思源。
 
-只支持桌面端（Windows / macOS / Linux）——插件要读本地文件系统。
+只支持桌面端（Windows / macOS / Linux）——插件要读本地文件系统。最低思源版本 3.1.0；开发与完整测试基于 3.8.8。
 
 ## 使用
 

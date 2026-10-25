@@ -21,7 +21,7 @@ From the marketplace: **Settings → Marketplace → Plugins → Drag Import →
 
 Manually: download `package.zip` from the latest release, extract it into `<workspace>/data/plugins/siyuan-drag-import/`, and restart SiYuan.
 
-The plugin needs the desktop app (Windows, macOS or Linux) — it uses the local file system.
+The plugin needs the desktop app (Windows, macOS or Linux) — it uses the local file system. Minimum SiYuan version is 3.1.0; it is developed and fully tested against 3.8.8.
 
 ## Usage
 
