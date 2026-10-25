@@ -2,7 +2,7 @@
   "name": "siyuan-drag-import",
   "author": "clock-05",
   "url": "https://github.com/clock-05/siyuan-drag-import",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minAppVersion": "3.1.0",
   "backends": [
     "windows",
@@ -18,8 +18,8 @@
     "zh-CN": "拖拽导入"
   },
   "description": {
-    "default": "Drag Markdown files, whole folders or ZIP archives from your file manager onto SiYuan's document tree: the folder structure becomes documents, images and attachments are uploaded and linked, name conflicts can be replaced or appended, and any import can be undone for 30 seconds.",
-    "zh-CN": "从资源管理器把 md、整个文件夹或 zip 拖到文档树，松手就是一篇篇文档，层级原样还原。图片与附件自动上传并改写链接，同名冲突可选覆盖或追加，整批导入 30 秒内可撤销。"
+    "default": "Drag Markdown files, folders or ZIP archives onto the document tree to create documents, with images and attachments uploaded automatically. A result card appears afterwards, offering undo, retry of failed items, and the import log. The code was written entirely by AI; the author tested it.",
+    "zh-CN": "把 md 文件、文件夹或 zip 拖到文档树，生成对应文档，图片与附件自动上传。导入结束后弹出结果卡片，可撤销、重试失败项、打开日志。代码由 AI 全部完成，作者负责测试。"
   },
   "readme": {
     "default": "README.md",

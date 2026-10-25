@@ -109,6 +109,10 @@ npm run test:offline # 不需要思源的测试
 
 行为约定见 `docs/DESIGN.md`，撤销背后的快照实验见 `docs/RESTORE-SPIKE.md`，开发里程碑见 `docs/MILESTONES.md`。
 
+## 关于这份代码
+
+本插件的代码完全由 AI 编写。作者负责提出需求、逐个版本手工测试，并对发布内容负责。
+
 ## 许可证
 
 MIT，见 [LICENSE](LICENSE)。

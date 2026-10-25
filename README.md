@@ -109,6 +109,10 @@ The plugin is TypeScript, bundled with esbuild into a CommonJS `index.js`. Impor
 
 See `docs/DESIGN.md` for the behaviour contract and `docs/RESTORE-SPIKE.md` for the snapshot experiments behind undo.
 
+## A note on how this was written
+
+The code of this plugin was written entirely by AI. The author wrote the requirements, tested every release by hand, and is responsible for what ships.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
