@@ -2,9 +2,19 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<title>结果卡片 · 四种状态预览</title>
+<title>结果卡片 · 状态预览（开发期）</title>
 <link rel="stylesheet" href="../index.css">
 <style>
+  .stale-note {
+    max-width: 960px;
+    margin: 0 0 20px;
+    padding: 10px 14px;
+    border-left: 3px solid #e6a23c;
+    background: #fff8e6;
+    color: #6b4e00;
+    font-size: 13px;
+    line-height: 1.6;
+  }
   body {
     margin: 0;
     padding: 32px;
@@ -25,6 +35,10 @@
 </style>
 </head>
 <body>
+<p class="stale-note">
+  开发期静态预览：用来核对卡片的视觉与状态，部分文案停留在早期里程碑（例如「文件夹暂不支持」）。
+  当前行为以根目录 README 和真实插件为准。
+</p>
   <h1>卡片 · 状态预览</h1>
   <p class="note">静态预览，样式与插件共用 index.css。真机上由 src/ui/result.ts、src/ui/conflict.ts 生成同样的结构。</p>
 
