@@ -4,6 +4,16 @@
 
 No copy-paste, no "import now, fix later". A folder of 200 notes becomes a folder of 200 documents in one drag.
 
+![Dropping a folder onto the document tree — hierarchy recreated, attachments uploaded, undoable card](https://raw.githubusercontent.com/clock-05/siyuan-drag-import/main/preview.png)
+
+## When it pays off
+
+- Moving a whole Obsidian / Typora / Logseq vault into SiYuan without creating documents one by one.
+- You already have a folder tree of Markdown files and want it to stay that way.
+- Images and PDFs sit next to the notes and you would rather not re-attach them by hand.
+
+For one or two files, SiYuan's built-in import is enough. This plugin saves the time when it is dozens or hundreds of notes — with the hierarchy intact.
+
 ## Features
 
 - **Files, folders, archives.** Drag any number of `.md` / `.markdown` / `.mdown` / `.mkd` files, whole folders, or `.zip` archives. Sub-folders become nested documents; an archive's single wrapping folder is unwrapped instead of duplicated.

@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>拖拽导入 · 市集预览图（1024×768）</title>
+<style>
+  /* 这是市集 preview.png 的可复现源文件：不依赖思源，按真实卡片样式重绘。
+     渲染：edge --headless --window-size=1024,768 --screenshot=preview.png docs/preview.html */
+  :root {
+    --primary: #3575f0;
+    --primary-weak: #eaf1ff;
+    --text: #1f2329;
+    --muted: #6b7280;
+    --faint: #9aa1ac;
+    --border: #e6e8ec;
+    --sidebar: #f7f8fa;
+    --success: #1d9e75;
+    --error: #d23f31;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    width: 1024px;
+    height: 768px;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(900px 460px at 82% -6%, rgba(53, 117, 240, 0.13), rgba(53, 117, 240, 0) 62%),
+      radial-gradient(700px 420px at 4% 100%, rgba(29, 158, 117, 0.07), rgba(29, 158, 117, 0) 60%),
+      linear-gradient(168deg, #f7f9fd 0%, #eef2f9 58%, #e7edf7 100%);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- 标题区 ---------- */
+  .head {
+    position: absolute;
+    top: 30px;
+    left: 34px;
+    right: 34px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .head h1 {
+    margin: 0;
+    font-size: 31px;
+    line-height: 1.18;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    color: #161b22;
+  }
+
+  .head h1 em {
+    font-style: normal;
+    color: var(--primary);
+  }
+
+  .head p {
+    margin: 9px 0 0;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: #5b6472;
+    letter-spacing: 0.1px;
+  }
+
+  .chips {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+    padding-top: 6px;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 27px;
+    padding: 0 11px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(53, 117, 240, 0.16);
+    color: #3d4a5c;
+    font-size: 12px;
+    box-shadow: 0 1px 2px rgba(20, 32, 60, 0.04);
+  }
+
+  .chip svg { color: var(--primary); opacity: 0.9; }
+
+  /* ---------- 窗口 ---------- */
+  .win {
+    position: absolute;
+    top: 118px;
+    left: 32px;
+    width: 960px;
+    height: 616px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow:
+      0 30px 70px rgba(19, 30, 55, 0.20),
+      0 8px 20px rgba(19, 30, 55, 0.08),
+      0 0 0 1px rgba(19, 30, 55, 0.06);
+    overflow: hidden;
+  }
+
+  .win__bar {
+    height: 38px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 0 12px;
+    background: #fbfbfc;
+    border-bottom: 1px solid #eaecf0;
+  }
+
+  .logo {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    background: linear-gradient(145deg, #6a9cff, #2f6ae4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+
+  .win__name {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #33383f;
+  }
+
+  .win__app {
+    font-size: 12px;
+    color: var(--faint);
+  }
+
+  .win__spacer { flex: 1; }
+
+  .win__ctl {
+    display: flex;
+    gap: 16px;
+    color: #98a0ab;
+    font-size: 12px;
+    line-height: 1;
+    padding-right: 4px;
+  }
+
+  .win__ctl i {
+    display: block;
+    width: 10px;
+    height: 10px;
+    border: 1.2px solid currentColor;
+    border-radius: 1px;
+  }
+
+  .win__ctl .min { height: 1.2px; border: 0; border-top: 1.2px solid currentColor; margin-top: 5px; }
+
+  .win__body {
+    position: relative;
+    display: flex;
+    height: 552px;
+  }
+
+  /* ---------- 文档树 ---------- */
+  .tree {
+    position: relative;
+    width: 264px;
+    flex: none;
+    background: var(--sidebar);
+    border-right: 1px solid #eff1f4;
+  }
+
+  .tree__head {
+    height: 34px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 12px;
+    color: #7d8590;
+    font-size: 11.5px;
+    letter-spacing: 0.4px;
+  }
+
+  .tree__head .grow { flex: 1; }
+  .tree__head svg { opacity: 0.55; }
+
+  .row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 31px;
+    padding: 0 8px;
+    margin: 1px 6px;
+    border-radius: 4px;
+    font-size: 13.5px;
+    color: #2b3038;
+    white-space: nowrap;
+  }
+
+  .row svg { flex: none; color: #8b929c; }
+  .row .caret { width: 9px; color: #aeb4bd; }
+  .row .text { overflow: hidden; text-overflow: ellipsis; }
+
+  .row--notebook { font-weight: 600; color: #1f2329; }
+  .row--notebook svg { color: #6f7d92; }
+
+  .row--l1 { padding-left: 24px; }
+  .row--l2 { padding-left: 44px; }
+
+  .row--current { background: #e9effb; color: #23456e; }
+  .row--current .text { font-weight: 500; }
+
+  /* 拖放目标行：和插件真实样式一致（outline + 浅色底） */
+  .row--drop {
+    background: var(--primary-weak);
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+  }
+
+  /* 拖拽框：覆盖整个文档树面板 */
+  .frame {
+    position: absolute;
+    inset: 1px;
+    border: 2px solid var(--primary);
+    border-radius: 4px;
+    background: rgba(53, 117, 240, 0.04);
+    pointer-events: none;
+  }
+
+  .banner {
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    right: 7px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 9px;
+    border-radius: 4px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 12.5px;
+    box-shadow: 0 3px 10px rgba(53, 117, 240, 0.32);
+  }
+
+  .banner .grow { flex: 1; }
+  .banner .meta { opacity: 0.85; font-size: 11.5px; }
+
+  /* ---------- 编辑区 ---------- */
+  .doc {
+    flex: 1;
+    padding: 16px 30px 0;
+    background: #fff;
+    min-width: 0;
+  }
+
+  .crumb {
+    font-size: 11.5px;
+    color: var(--faint);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .crumb .sep { opacity: 0.6; }
+
+  .doc h2 {
+    margin: 12px 0 14px;
+    font-size: 24px;
+    line-height: 1.25;
+    letter-spacing: -0.2px;
+    font-weight: 700;
+    color: #171c24;
+  }
+
+  .doc p {
+    margin: 0 0 13px;
+    font-size: 13.5px;
+    line-height: 1.85;
+    color: #3f4653;
+  }
+
+  .doc .ref {
+    color: #2f63d6;
+    background: #eef4ff;
+    border-radius: 3px;
+    padding: 1px 4px;
+    font-size: 13px;
+    box-shadow: inset 0 -1px 0 rgba(47, 99, 214, 0.25);
+  }
+
+  .figure {
+    margin: 14px 0 0;
+    width: 268px;
+  }
+
+  .figure__img {
+    height: 92px;
+    border-radius: 6px;
+    border: 1px solid #e8ebf1;
+    background: linear-gradient(150deg, #f4f7fd 0%, #e9effa 100%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    overflow: hidden;
+  }
+
+  .bars { display: flex; align-items: flex-end; gap: 5px; height: 56px; }
+  .bars i {
+    display: block;
+    width: 11px;
+    border-radius: 3px 3px 1px 1px;
+    background: #c7d7f5;
+  }
+  .bars i.on { background: linear-gradient(180deg, #7ba6f7, #3f78e8); }
+
+  .sketch {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .sketch b {
+    display: block;
+    height: 7px;
+    border-radius: 4px;
+    background: #d5e0f2;
+  }
+  .sketch b:nth-child(1) { width: 78%; background: #b9cdec; }
+  .sketch b:nth-child(2) { width: 92%; }
+  .sketch b:nth-child(3) { width: 64%; }
+
+  .figure figcaption {
+    margin-top: 7px;
+    font-size: 11px;
+    color: var(--faint);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .figure figcaption .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--success);
+  }
+
+  .callout {
+    margin: 2px 0 0;
+    width: 100%;
+    padding: 9px 12px 10px;
+    border-left: 3px solid var(--primary);
+    border-radius: 3px;
+    background: #f5f8ff;
+  }
+
+  .callout__title {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #2c4a7c;
+  }
+
+  .callout__title svg { color: var(--primary); }
+
+  .callout__body {
+    margin-top: 3px;
+    font-size: 12.5px;
+    line-height: 1.75;
+    color: #40506a;
+  }
+
+  .mono {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 11.5px;
+    background: rgba(53, 117, 240, 0.09);
+    border-radius: 3px;
+    padding: 0 3px;
+  }
+
+  /* ---------- 大纲面板 ---------- */
+  .outline {
+    width: 186px;
+    flex: none;
+    background: #fbfbfc;
+    border-left: 1px solid #eff1f4;
+    padding: 12px 8px;
+  }
+
+  .outline__head {
+    padding: 0 8px 8px;
+    font-size: 11.5px;
+    color: #7d8590;
+    letter-spacing: 0.4px;
+  }
+
+  .outline__row {
+    height: 26px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    margin: 1px 0;
+    border-radius: 3px;
+    font-size: 12.5px;
+    color: #464c56;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .outline__row--l1 { padding-left: 20px; color: #5c636e; }
+
+  .outline__row.is-on {
+    background: #e9effb;
+    color: #23456e;
+    font-weight: 500;
+  }
+
+  /* ---------- 结果卡片（按 index.css 重绘） ---------- */
+  .card {
+    position: absolute;
+    right: 18px;
+    bottom: 16px;
+    width: 372px;
+    border-radius: 8px;
+    background: #fff;
+    border: 1px solid rgba(20, 32, 60, 0.09);
+    box-shadow: 0 14px 38px rgba(17, 27, 51, 0.18), 0 2px 6px rgba(17, 27, 51, 0.06);
+    color: #202124;
+    font-size: 13px;
+    line-height: 1.5;
+    overflow: hidden;
+  }
+
+  .card__head {
+    display: flex;
+    align-items: center;
+    padding: 12px 12px 0 14px;
+  }
+
+  .card__title {
+    flex: 1;
+    font-size: 14.5px;
+    font-weight: 600;
+  }
+
+  .card__x {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #7c848f;
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .card__counts {
+    padding: 3px 14px 9px;
+    color: #5f6368;
+    display: flex;
+  }
+
+  .card__counts .grow { flex: 1; }
+  .card__counts b { font-weight: 600; }
+  .card__counts .ok { color: var(--primary); }
+  .card__counts .mut { font-weight: 400; opacity: 0.66; }
+  .card__counts .ms { font-style: normal; opacity: 0.6; }
+
+  .card__note {
+    padding: 0 14px 7px;
+    font-size: 12px;
+    color: #5f6368;
+    opacity: 0.86;
+  }
+
+  .card__foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 4px 14px 12px;
+  }
+
+  .btn {
+    height: 28px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgba(20, 32, 60, 0.12);
+    border-radius: 4px;
+    background: #f4f5f7;
+    color: #202124;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .btn--primary {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: #fff;
+    font-weight: 500;
+  }
+
+  .btn--danger { color: var(--error); }
+
+  /* ---------- 状态栏 ---------- */
+  .win__status {
+    height: 26px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    border-top: 1px solid #eff1f4;
+    background: #fbfbfc;
+    color: #98a0ab;
+    font-size: 11px;
+  }
+
+  .win__status .grow { flex: 1; }
+  .win__status .live { display: flex; align-items: center; gap: 5px; }
+  .win__status .live i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+  }
+
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div>
+    <h1>把文件夹拖进文档树，<em>层级原样还原</em></h1>
+    <p>Drop a folder onto the tree — documents, attachments and links come along.</p>
+  </div>
+  <div class="chips">
+    <span class="chip">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+        <path d="M3 2h6l4 4v8H3z" /><path d="M9 2v4h4" />
+      </svg>
+      .md
+    </span>
+    <span class="chip">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+        <path d="M2 4.5A1.5 1.5 0 0 1 3.5 3h3l1.4 1.6h4.6A1.5 1.5 0 0 1 14 6.1v6.4A1.5 1.5 0 0 1 12.5 14h-9A1.5 1.5 0 0 1 2 12.5z" />
+      </svg>
+      文件夹
+    </span>
+    <span class="chip">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+        <path d="M2 6V3h12v3M8 3v10M5.5 13h5" />
+      </svg>
+      .zip
+    </span>
+  </div>
+</div>
+
+<div class="win">
+  <div class="win__bar">
+    <span class="logo">S</span>
+    <span class="win__name">我的知识库</span>
+    <span class="win__app">— 思源笔记</span>
+    <span class="win__spacer"></span>
+    <span class="win__ctl"><span class="min"></span><i></i><span style="font-size:13px">×</span></span>
+  </div>
+
+  <div class="win__body">
+    <aside class="tree">
+      <div class="tree__head">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z" />
+        </svg>
+        文档树
+        <span class="grow"></span>
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+          <circle cx="7" cy="7" r="4.4" /><path d="M10.5 10.5 14 14" />
+        </svg>
+      </div>
+
+      <div class="row row--notebook">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <path d="M3.5 2.5h7A2 2 0 0 1 12.5 4.5v9h-9z" /><path d="M3.5 11.5h9" />
+        </svg>
+        <span class="text">我的知识库</span>
+      </div>
+
+      <div class="row row--l1">
+        <span class="caret">▸</span>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <path d="M3.5 1.8h5.2L12.5 5.6v8.6h-9z" /><path d="M8.5 1.8v4h4" />
+        </svg>
+        <span class="text">日记</span>
+      </div>
+
+      <div class="row row--l1 row--drop">
+        <span class="caret">▾</span>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <path d="M3.5 1.8h5.2L12.5 5.6v8.6h-9z" /><path d="M8.5 1.8v4h4" />
+        </svg>
+        <span class="text">项目文档</span>
+      </div>
+
+      <div class="row row--l2 row--current">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <path d="M3.5 1.8h5.2L12.5 5.6v8.6h-9z" /><path d="M8.5 1.8v4h4" />
+        </svg>
+        <span class="text">需求说明</span>
+      </div>
+
+      <div class="row row--l2">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <path d="M3.5 1.8h5.2L12.5 5.6v8.6h-9z" /><path d="M8.5 1.8v4h4" />
+        </svg>
+        <span class="text">设计稿</span>
+      </div>
+
+      <div class="row row--l2">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <path d="M3.5 1.8h5.2L12.5 5.6v8.6h-9z" /><path d="M8.5 1.8v4h4" />
+        </svg>
+        <span class="text">会议记录</span>
+      </div>
+
+      <div class="row row--l2">
+        <span class="caret">▸</span>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <path d="M3.5 1.8h5.2L12.5 5.6v8.6h-9z" /><path d="M8.5 1.8v4h4" />
+        </svg>
+        <span class="text">素材</span>
+      </div>
+
+      <div class="row row--l1">
+        <span class="caret">▸</span>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <path d="M3.5 1.8h5.2L12.5 5.6v8.6h-9z" /><path d="M8.5 1.8v4h4" />
+        </svg>
+        <span class="text">读书笔记</span>
+      </div>
+      <div class="row row--l1">
+        <span class="caret">▸</span>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <path d="M3.5 1.8h5.2L12.5 5.6v8.6h-9z" /><path d="M8.5 1.8v4h4" />
+        </svg>
+        <span class="text">剪藏</span>
+      </div>
+
+      <div class="row row--l1">
+        <span class="caret">▸</span>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <path d="M3.5 1.8h5.2L12.5 5.6v8.6h-9z" /><path d="M8.5 1.8v4h4" />
+        </svg>
+        <span class="text">归档</span>
+      </div>
+
+      <div class="row row--l1">
+        <span class="caret">▸</span>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+          <path d="M3.5 1.8h5.2L12.5 5.6v8.6h-9z" /><path d="M8.5 1.8v4h4" />
+        </svg>
+        <span class="text">模板</span>
+      </div>
+
+      <div class="frame"></div>
+      <div class="banner">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M8 2v7" /><path d="M5 6.4 8 9.6l3-3.2" /><path d="M3 12.5h10" />
+        </svg>
+        <span class="grow">释放以导入到「项目文档」</span>
+        <span class="meta">12 个文件</span>
+      </div>
+    </aside>
+
+    <main class="doc">
+      <div class="crumb">
+        项目文档
+        <span class="sep">/</span>
+        需求说明
+      </div>
+      <h2>需求说明</h2>
+      <p>整个「项目文档」文件夹拖进文档树，子目录按原样变成子文档，一篇不少、一层不差。</p>
+      <p>正文里引用的图片和 PDF 跟着上传到 assets，链接一起改写；代码块里的写法不动。同名冲突先问你：跳过、加后缀、覆盖或追加。</p>
+
+      <div class="callout">
+        <div class="callout__title">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M8 1.8 9.5 6l4.2 1.5L9.5 9 8 13.2 6.5 9 2.3 7.5 6.5 6z" />
+          </svg>
+          迁移提示
+        </div>
+        <div class="callout__body">从 Obsidian 过来的笔记不用改写：<span class="mono">![[图片.png]]</span> 自动上传，<span class="mono">[[笔记]]</span> 转成可点击的引用。</div>
+      </div>
+
+      <figure class="figure">
+        <div class="figure__img">
+          <div class="bars">
+            <i style="height:38%"></i>
+            <i style="height:64%"></i>
+            <i style="height:47%"></i>
+            <i class="on" style="height:88%"></i>
+            <i style="height:58%"></i>
+          </div>
+          <div class="sketch"><b></b><b></b><b></b></div>
+        </div>
+        <figcaption><span class="dot"></span>assets/设计稿.png · 已上传</figcaption>
+      </figure>
+    </main>
+
+    <aside class="outline">
+      <div class="outline__head">大纲</div>
+      <div class="outline__row is-on">需求说明</div>
+      <div class="outline__row outline__row--l1">背景</div>
+      <div class="outline__row outline__row--l1">范围</div>
+      <div class="outline__row outline__row--l1">验收标准</div>
+      <div class="outline__row outline__row--l1">附件</div>
+      <div class="outline__row">相关阅读</div>
+    </aside>
+
+    <div class="card">
+      <div class="card__head">
+        <span class="card__title">导入完成</span>
+        <span class="card__x">×</span>
+      </div>
+      <div class="card__counts">
+        <span class="grow">
+          <b class="ok">成功 12</b><span class="mut">（覆盖 1）</span>
+          <span class="mut"> · </span>跳过 2<span class="mut"> · </span><b>失败 0</b>
+        </span>
+        <em class="ms">1.8s</em>
+      </div>
+      <div class="card__note">已上传 5 个附件（.png、.pdf）</div>
+      <div class="card__note">已把 3 处 [[双链]] 转为引用</div>
+      <div class="card__foot">
+        <span class="btn btn--primary">打开第一篇</span>
+        <span class="btn btn--danger">撤销本次导入（28s）</span>
+        <span class="btn">打开日志</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="win__status">
+    <span class="live"><i></i>已同步</span>
+    <span>12 篇 · 1.8 秒</span>
+    <span class="grow"></span>
+    <span>字数 1,284</span>
+  </div>
+</div>
+
+
+</body>
+</html>

@@ -18,18 +18,23 @@
     "zh-CN": "拖拽导入"
   },
   "description": {
-    "default": "Drag Markdown files, folders or ZIP archives from the file manager onto the document tree to import them, keeping the folder hierarchy. Local images and files (PDF, Word…) are uploaded automatically, including Obsidian ![[...]] embeds.",
-    "zh-CN": "把 Markdown 文件、文件夹、压缩包从资源管理器直接拖到文档树导入，层级原样还原。正文里的图片、PDF 等本地文件自动上传并改写链接，Obsidian 的 ![[...]] 写法也认。"
+    "default": "Drag Markdown files, whole folders or ZIP archives from your file manager onto SiYuan's document tree: the folder structure becomes documents, images and attachments are uploaded and linked, name conflicts can be replaced or appended, and any import can be undone for 30 seconds.",
+    "zh-CN": "从资源管理器把 md、整个文件夹或 zip 拖到文档树，松手就是一篇篇文档，层级原样还原。图片与附件自动上传并改写链接，同名冲突可选覆盖或追加，整批导入 30 秒内可撤销。"
   },
   "readme": {
     "default": "README.md",
     "zh-CN": "README.zh-CN.md"
   },
   "icon": "icon.png",
+  "preview": "preview.png",
   "keywords": [
     "import",
     "drag",
     "markdown",
+    "folder",
+    "zip",
+    "obsidian",
+    "迁移",
     "拖拽",
     "导入"
   ]

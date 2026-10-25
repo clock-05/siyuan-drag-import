@@ -34,13 +34,19 @@ const syncDir = workspace ? path.join(workspace, "data", "plugins", PLUGIN_NAME)
  * 静态资源：集市要求 index.css / plugin.json / README*，图标与预览图由 plugin.json 声明。
  * 界面文案已经打进了 index.js，所以**不再**产出 i18n/*.ts（那只是源码）。
  */
-const STATIC_FILES = ["plugin.json", "index.css", "icon.png", "README.md", "README.zh-CN.md", "LICENSE"];
-/** 可选：集市预览图。有就带上（plugin.json 里也要声明 preview） */
-const OPTIONAL_FILES = ["preview.png"];
+const STATIC_FILES = [
+  "plugin.json",
+  "index.css",
+  "icon.png",
+  "preview.png",
+  "README.md",
+  "README.zh-CN.md",
+  "LICENSE",
+];
 
 function copyStatic(dir) {
   fs.mkdirSync(dir, { recursive: true });
-  for (const file of [...STATIC_FILES, ...OPTIONAL_FILES]) {
+  for (const file of STATIC_FILES) {
     const source = path.join(root, file);
     if (fs.existsSync(source)) {
       fs.copyFileSync(source, path.join(dir, file));

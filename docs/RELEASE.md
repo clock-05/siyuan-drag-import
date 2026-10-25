@@ -6,7 +6,13 @@
 
 1. **确认 GitHub 仓库地址**。`plugin.json` 里现在写的是
    `https://github.com/clock-05/siyuan-drag-import`。如果你的 GitHub 用户名不是 `clock-05`，
-   把 `plugin.json` 的 `url` 和 `author` 改成实际值（集市按 `owner/repo` 收录，写错会检查失败）。
+   把 `plugin.json` 的 `url`、`author` 改成实际值（集市按 `owner/repo` 收录，写错会检查失败）。
+   README 首屏的预览图用的是 `raw.githubusercontent.com` 绝对地址，同样要跟着换：
+
+   ```bash
+   grep -rl "clock-05/siyuan-drag-import" README.md README.zh-CN.md \
+     | xargs sed -i "s#clock-05/siyuan-drag-import#<你的用户名>/siyuan-drag-import#g"
+   ```
 2. **建仓库并推送**（仓库必须公开、默认分支 `main`、仓库名必须叫 `siyuan-drag-import`）：
 
    ```bash
@@ -15,10 +21,16 @@
    git push -u origin main
    ```
 
-3. **提供一张预览图**。集市卡片用 `preview.png`：**1024×768、≤512 KiB、PNG/JPEG/WebP**。
-   做法：在思源里拖一个示例文件夹进文档树，趁拖拽横幅或结果卡片还在时截屏（Win+Shift+S），
-   把原图发我，我裁成 1024×768 并压到 512 KiB 以内；也可以自己替换根目录的 `preview.png`。
-   图片就位后，`plugin.json` 要加一行 `"preview": "preview.png"`（这一步我可以代做）。
+3. **预览图（已就位）**。`preview.png` 是 1024×768 / 269 KiB，由 `docs/preview.html` 渲染而来
+   （按真实卡片样式重绘的示意图，不含真实笔记内容）。要改文案或配色就改那个 HTML，然后：
+
+   ```bash
+   edge --headless=new --disable-gpu --hide-scrollbars --force-device-scale-factor=2 \
+        --window-size=1024,768 --screenshot=preview@2x.png docs/preview.html
+   # 再下采样到 1024×768 并压到 512 KiB 以内，覆盖根目录 preview.png
+   ```
+
+   `plugin.json` 已声明 `"preview": "preview.png"`，`package.zip` 里也会带上。
 
 ## 第一次发版
 
