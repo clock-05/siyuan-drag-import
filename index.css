@@ -1,0 +1,498 @@
+/* ============================================================
+   拖拽导入 · 插件样式
+   两类东西：拖拽时的三层视觉、右下角结果卡片。
+   类名统一 sdi- 前缀，避免和思源自身样式撞车。
+   ============================================================ */
+
+/* ---------- 拖拽视觉 ---------- */
+
+.sdi-frame {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  box-sizing: border-box;
+  border: 2px solid var(--b3-theme-primary, #3575f0);
+  border-radius: 4px;
+  background: rgba(53, 117, 240, 0.04);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.sdi-frame.sdi-frame--visible {
+  opacity: 1;
+}
+
+.sdi-banner {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: var(--b3-theme-primary, #3575f0);
+  color: #fff;
+  font-size: 12px;
+  line-height: 26px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sdi-banner__text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sdi-banner__hint {
+  flex: none;
+  opacity: 0.82;
+}
+
+/* 命中的行：描边；笔记本行额外给一条底部插入线 */
+.sdi-row {
+  position: relative;
+  outline: 2px solid var(--b3-theme-primary, #3575f0);
+  outline-offset: -2px;
+  border-radius: 3px;
+}
+
+.sdi-row--notebook::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 0;
+  height: 2px;
+  background: var(--b3-theme-primary, #3575f0);
+  border-radius: 1px;
+}
+
+/* ---------- 结果卡片 ---------- */
+
+.sdi-card {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 100;
+  width: 360px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  background: var(--b3-theme-background, #fff);
+  color: var(--b3-theme-on-background, #202124);
+  border: 1px solid var(--b3-border-color, rgba(0, 0, 0, 0.08));
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow: hidden;
+  animation: sdi-card-in 0.16s ease;
+}
+
+@keyframes sdi-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.sdi-card__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 12px 0 14px;
+}
+
+.sdi-card__title {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sdi-card__close {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--b3-theme-on-surface, #5f6368);
+  font-size: 16px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.sdi-card__close:hover {
+  background: var(--b3-list-hover, rgba(0, 0, 0, 0.06));
+}
+
+.sdi-card__counts {
+  padding: 2px 14px 10px;
+  color: var(--b3-theme-on-surface, #5f6368);
+}
+
+.sdi-card__counts b {
+  font-weight: 600;
+}
+
+.sdi-card__counts .sdi-ok {
+  color: var(--b3-theme-primary, #3575f0);
+}
+
+.sdi-card__counts .sdi-bad {
+  color: var(--b3-theme-error, #d23f31);
+}
+
+.sdi-card__counts em {
+  float: right;
+  font-style: normal;
+  opacity: 0.6;
+}
+
+/* 「全是不支持」时的引导语：说清是类型没做，不是文件空了 */
+.sdi-card__hint {
+  margin: -4px 14px 10px;
+  color: var(--b3-theme-on-surface, #5f6368);
+  opacity: 0.75;
+}
+
+.sdi-card__list {
+  margin: 0;
+  padding: 0 14px 10px;
+  list-style: none;
+  max-height: 168px;
+  overflow: auto;
+}
+
+.sdi-card__list li {
+  display: flex;
+  gap: 8px;
+  padding: 2px 0;
+  color: var(--b3-theme-on-surface, #5f6368);
+}
+
+.sdi-card__list li span:first-child {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sdi-card__list li span:last-child {
+  flex: none;
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.75;
+}
+
+.sdi-card__more {
+  padding: 0 14px 8px;
+  color: var(--b3-theme-on-surface, #5f6368);
+  opacity: 0.7;
+}
+
+.sdi-card__log {
+  margin: 0 14px 10px;
+  padding: 8px;
+  max-height: 200px;
+  overflow: auto;
+  border-radius: 4px;
+  background: var(--b3-theme-surface, #f4f4f5);
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.sdi-card__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 14px 12px;
+}
+
+/* 导入进行中：确定性进度条（M3 再加取消与单篇耗时） */
+.sdi-card__bar {
+  position: relative;
+  margin: 0 14px 14px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--b3-theme-surface, #f4f4f5);
+  overflow: hidden;
+}
+
+.sdi-card__bar i {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--b3-theme-primary, #3575f0);
+  transition: width 0.18s ease;
+}
+
+.sdi-card__progress {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 解压/扫描阶段还没有确定进度，用滑块表示「在动」 */
+.sdi-card__bar--busy i {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 35%;
+  animation: sdi-bar 1.1s ease-in-out infinite;
+}
+
+@keyframes sdi-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+.sdi-card__counts em {
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sdi-card__btn {
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--b3-border-color, rgba(0, 0, 0, 0.1));
+  border-radius: 4px;
+  background: var(--b3-theme-surface, #f4f4f5);
+  color: var(--b3-theme-on-background, #202124);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.sdi-card__btn:hover {
+  background: var(--b3-list-hover, rgba(0, 0, 0, 0.06));
+}
+
+.sdi-card__btn--primary {
+  border-color: var(--b3-theme-primary, #3575f0);
+  background: var(--b3-theme-primary, #3575f0);
+  color: #fff;
+}
+
+.sdi-card__btn--primary:hover {
+  filter: brightness(1.06);
+  background: var(--b3-theme-primary, #3575f0);
+}
+
+.sdi-card__btn[disabled] {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ---------- 同名冲突卡片 ---------- */
+
+.sdi-muted {
+  font-weight: 400;
+  opacity: 0.65;
+}
+
+/* 上传图片的结果说明（成功也提一句，失败要能看见） */
+.sdi-card__note {
+  margin: -4px 14px 10px;
+  color: var(--b3-theme-on-surface, #5f6368);
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.sdi-card__btn--danger {
+  color: var(--b3-theme-error, #d23f31);
+}
+
+.sdi-card__btn--danger:hover {
+  background: rgba(210, 63, 49, 0.08);
+}
+
+.sdi-card__btn--danger.is-confirming {
+  border-color: var(--b3-theme-error, #d23f31);
+  background: var(--b3-theme-error, #d23f31);
+  color: #fff;
+}
+
+/* ---------- 收缩态：一行小条，只压在状态栏上方那条缝里 ---------- */
+
+.sdi-card--mini {
+  width: auto;
+  max-width: 340px;
+  border-radius: 999px;
+  animation: none;
+}
+
+.sdi-card__mini {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 3px 3px 10px;
+}
+
+.sdi-card__mini-main {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 2px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.sdi-card__mini-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--b3-theme-success, #1d9e75);
+}
+
+.sdi-card__mini-dot.is-bad {
+  background: var(--b3-theme-error, #d23f31);
+}
+
+.sdi-card--has-fail .sdi-card__mini-text {
+  color: var(--b3-theme-error, #d23f31);
+}
+
+.sdi-card__mini-undo {
+  color: var(--b3-theme-on-surface, #5f6368);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sdi-card__mini-undo:not(:empty)::before {
+  content: "·";
+  margin-right: 7px;
+  color: var(--b3-border-color, rgba(0, 0, 0, 0.08));
+}
+
+.sdi-card__mini-close {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--b3-theme-on-surface, #5f6368);
+  font-size: 14px;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.sdi-card__mini-close:hover {
+  background: var(--b3-list-hover, rgba(0, 0, 0, 0.06));
+}
+
+
+.sdi-conflict {
+  width: 380px;
+}
+
+.sdi-conflict__list {
+  margin: 0;
+  padding: 0 14px 8px;
+  list-style: none;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.sdi-conflict__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.sdi-conflict__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.sdi-conflict__ops {
+  flex: none;
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 5px;
+  background: var(--b3-theme-surface, #f4f4f5);
+}
+
+.sdi-conflict__op {
+  padding: 2px 8px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--b3-theme-on-surface, #5f6368);
+  font-size: 12px;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.sdi-conflict__op:hover {
+  background: var(--b3-list-hover, rgba(0, 0, 0, 0.06));
+}
+
+.sdi-conflict__op.is-active {
+  background: var(--b3-theme-primary, #3575f0);
+  color: #fff;
+}
+
+.sdi-conflict__more {
+  padding: 0 14px 8px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.sdi-conflict__warn {
+  margin: 0 14px 10px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: rgba(210, 63, 49, 0.08);
+  color: var(--b3-theme-error, #d23f31);
+  font-size: 12px;
+}
+
+.sdi-conflict__bulk {
+  display: flex;
+  gap: 6px;
+  padding: 0 14px 10px;
+}
+
+.sdi-conflict__bulk .sdi-card__btn {
+  flex: 1;
+  padding: 0 4px;
+}

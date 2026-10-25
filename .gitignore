@@ -3,3 +3,5 @@ dist/
 .env
 .workbuddy/
 *.log
+test/.build/
+test/.dbg/

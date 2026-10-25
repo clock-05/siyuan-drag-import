@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>结果卡片 · 四种状态预览</title>
+<link rel="stylesheet" href="../index.css">
+<style>
+  body {
+    margin: 0;
+    padding: 32px;
+    background: #f5f6f8;
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+    color: #202124;
+  }
+  h1 { font-size: 16px; margin: 0 0 6px; }
+  p.note { margin: 0 0 24px; font-size: 12px; color: #6b7280; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 360px));
+    gap: 20px;
+  }
+  .cell > .label { font-size: 12px; color: #6b7280; margin-bottom: 8px; }
+  /* 预览页里让卡片回流，不贴屏幕右下角 */
+  .cell .sdi-card { position: static; animation: none; }
+</style>
+</head>
+<body>
+  <h1>卡片 · 状态预览</h1>
+  <p class="note">静态预览，样式与插件共用 index.css。真机上由 src/ui/result.ts、src/ui/conflict.ts 生成同样的结构。</p>
+
+  <div class="grid">
+    <div class="cell">
+      <div class="label">① 只拖文件夹（M1 不支持）</div>
+      <div class="sdi-card">
+        <div class="sdi-card__head">
+          <span class="sdi-card__title">文件夹暂不支持</span>
+          <button class="sdi-card__close" type="button" aria-label="关闭">×</button>
+        </div>
+        <div class="sdi-card__hint">文件夹递归导入排在 M2。现在可以把里面的 md 文件单独拖进来。</div>
+        <ul class="sdi-card__list">
+          <li><span>of Edge</span><span>文件夹（M2 支持）</span></li>
+        </ul>
+        <div class="sdi-card__foot">
+          <button class="sdi-card__btn" type="button">打开日志</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="label">② 只拖压缩包</div>
+      <div class="sdi-card">
+        <div class="sdi-card__head">
+          <span class="sdi-card__title">压缩包暂不支持</span>
+          <button class="sdi-card__close" type="button" aria-label="关闭">×</button>
+        </div>
+        <div class="sdi-card__hint">压缩包解压排在 M3。现在可以先解压，再把 md 文件拖进来。</div>
+        <ul class="sdi-card__list">
+          <li><span>资料包.zip</span><span>压缩包（M3 支持）</span></li>
+        </ul>
+        <div class="sdi-card__foot">
+          <button class="sdi-card__btn" type="button">打开日志</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="label">③ 混合：成功 3 · 跳过 2</div>
+      <div class="sdi-card">
+        <div class="sdi-card__head">
+          <span class="sdi-card__title">导入完成</span>
+          <button class="sdi-card__close" type="button" aria-label="关闭">×</button>
+        </div>
+        <div class="sdi-card__counts"><b class="sdi-ok">成功 3</b> · 跳过 2 · <b>失败 0</b><em>186ms</em></div>
+        <ul class="sdi-card__list">
+          <li><span>封面.png</span><span>非 Markdown（.png）</span></li>
+          <li><span>资料包.zip</span><span>压缩包（M3 支持）</span></li>
+        </ul>
+        <div class="sdi-card__foot">
+          <button class="sdi-card__btn sdi-card__btn--primary" type="button">打开第一篇</button>
+          <button class="sdi-card__btn" type="button">打开日志</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="label">④ 有失败项</div>
+      <div class="sdi-card">
+        <div class="sdi-card__head">
+          <span class="sdi-card__title">导入完成</span>
+          <button class="sdi-card__close" type="button" aria-label="关闭">×</button>
+        </div>
+        <div class="sdi-card__counts"><b class="sdi-ok">成功 2</b> · 跳过 0 · <b class="sdi-bad">失败 1</b><em>1.2s</em></div>
+        <ul class="sdi-card__list">
+          <li><span>被占用的笔记.md</span><span>无读取权限（可能被其他程序占用）</span></li>
+        </ul>
+        <div class="sdi-card__foot">
+          <button class="sdi-card__btn sdi-card__btn--primary" type="button">打开第一篇</button>
+          <button class="sdi-card__btn" type="button">打开日志</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="label">⑤ 解压阶段（zip）</div>
+      <div class="sdi-card sdi-card--busy">
+        <div class="sdi-card__head"><span class="sdi-card__title">正在读取…</span></div>
+        <div class="sdi-card__counts"><span class="sdi-card__progress">解压中</span><em>压缩包A.zip</em></div>
+        <div class="sdi-card__bar sdi-card__bar--busy"><i></i></div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="label">⑥ 导入中（可取消）</div>
+      <div class="sdi-card sdi-card--busy">
+        <div class="sdi-card__head"><span class="sdi-card__title">正在导入 48 篇…</span></div>
+        <div class="sdi-card__counts"><span class="sdi-card__progress">12 / 48 · 约 25 秒</span><em>spec/c.md</em></div>
+        <div class="sdi-card__bar"><i style="width: 25%"></i></div>
+        <div class="sdi-card__foot"><button class="sdi-card__btn" type="button">取消导入</button></div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="label">⑦ 同名冲突：默认全选「加后缀」</div>
+      <div class="sdi-card sdi-conflict">
+        <div class="sdi-card__head">
+          <span class="sdi-card__title">有 3 篇同名</span>
+          <button class="sdi-card__close" type="button" aria-label="取消导入">×</button>
+        </div>
+        <div class="sdi-card__counts">导入到「知识类」，逐条选或一键全部</div>
+        <ul class="sdi-conflict__list">
+          <li class="sdi-conflict__row">
+            <span class="sdi-conflict__name">笔记</span>
+            <span class="sdi-conflict__ops">
+              <button type="button" class="sdi-conflict__op">跳过</button>
+              <button type="button" class="sdi-conflict__op is-active">加后缀</button>
+              <button type="button" class="sdi-conflict__op">覆盖</button>
+              <button type="button" class="sdi-conflict__op">追加</button>
+            </span>
+          </li>
+          <li class="sdi-conflict__row">
+            <span class="sdi-conflict__name">spec</span>
+            <span class="sdi-conflict__ops">
+              <button type="button" class="sdi-conflict__op">跳过</button>
+              <button type="button" class="sdi-conflict__op is-active">加后缀</button>
+              <button type="button" class="sdi-conflict__op">覆盖</button>
+              <button type="button" class="sdi-conflict__op">追加</button>
+            </span>
+          </li>
+        </ul>
+        <div class="sdi-conflict__more">另有 1 项，默认「加后缀」，可用下面的「全部」统一设置</div>
+        <div class="sdi-conflict__warn" hidden>覆盖会清空已有正文（子文档保留），可撤销还原</div>
+        <div class="sdi-conflict__bulk">
+          <button type="button" class="sdi-card__btn">全部跳过</button>
+          <button type="button" class="sdi-card__btn">全部加后缀</button>
+          <button type="button" class="sdi-card__btn">全部覆盖</button>
+          <button type="button" class="sdi-card__btn">全部追加</button>
+        </div>
+        <div class="sdi-card__foot">
+          <button type="button" class="sdi-card__btn">取消导入</button>
+          <button type="button" class="sdi-card__btn sdi-card__btn--primary">开始导入</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="label">⑧ 冲突：选了覆盖（出现风险提示）</div>
+      <div class="sdi-card sdi-conflict">
+        <div class="sdi-card__head">
+          <span class="sdi-card__title">有 3 篇同名</span>
+          <button class="sdi-card__close" type="button" aria-label="取消导入">×</button>
+        </div>
+        <div class="sdi-card__counts">导入到「知识类」，逐条选或一键全部</div>
+        <ul class="sdi-conflict__list">
+          <li class="sdi-conflict__row">
+            <span class="sdi-conflict__name">笔记</span>
+            <span class="sdi-conflict__ops">
+              <button type="button" class="sdi-conflict__op">跳过</button>
+              <button type="button" class="sdi-conflict__op">加后缀</button>
+              <button type="button" class="sdi-conflict__op is-active">覆盖</button>
+              <button type="button" class="sdi-conflict__op">追加</button>
+            </span>
+          </li>
+          <li class="sdi-conflict__row">
+            <span class="sdi-conflict__name">spec</span>
+            <span class="sdi-conflict__ops">
+              <button type="button" class="sdi-conflict__op">跳过</button>
+              <button type="button" class="sdi-conflict__op">加后缀</button>
+              <button type="button" class="sdi-conflict__op is-active">覆盖</button>
+              <button type="button" class="sdi-conflict__op">追加</button>
+            </span>
+          </li>
+        </ul>
+        <div class="sdi-conflict__warn">覆盖会清空已有正文（子文档保留），可撤销还原</div>
+        <div class="sdi-conflict__bulk">
+          <button type="button" class="sdi-card__btn">全部跳过</button>
+          <button type="button" class="sdi-card__btn">全部加后缀</button>
+          <button type="button" class="sdi-card__btn">全部覆盖</button>
+          <button type="button" class="sdi-card__btn">全部追加</button>
+        </div>
+        <div class="sdi-card__foot">
+          <button type="button" class="sdi-card__btn">取消导入</button>
+          <button type="button" class="sdi-card__btn sdi-card__btn--primary">开始导入</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="label">⑨ 成功 + 图片说明 + 撤销</div>
+      <div class="sdi-card">
+        <div class="sdi-card__head">
+          <span class="sdi-card__title">导入完成</span>
+          <button class="sdi-card__close" type="button" aria-label="关闭">×</button>
+        </div>
+        <div class="sdi-card__counts"><b class="sdi-ok">成功 12<span class="sdi-muted">（覆盖 1 · 追加 1）</span></b> · 跳过 2 · <b>失败 0</b><em>1.8s</em></div>
+        <div class="sdi-card__note">已上传 10 个附件（.png、.pdf），1 个附件找不到（.png），链接保持原样</div>
+        <ul class="sdi-card__list">
+          <li><span>封面.png</span><span>非 Markdown（.png）</span></li>
+        </ul>
+        <div class="sdi-card__foot">
+          <button class="sdi-card__btn sdi-card__btn--primary" type="button">打开第一篇</button>
+          <button class="sdi-card__btn sdi-card__btn--danger" type="button">撤销本次导入（28s）</button>
+          <button class="sdi-card__btn" type="button">打开日志</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="label">⑩ 只有一篇同名（不给批量按钮）</div>
+      <div class="sdi-card sdi-conflict">
+        <div class="sdi-card__head">
+          <span class="sdi-card__title">这篇文档已存在</span>
+          <button class="sdi-card__close" type="button" aria-label="取消导入">×</button>
+        </div>
+        <div class="sdi-card__counts">导入到「知识类」，选一种处理方式</div>
+        <ul class="sdi-conflict__list">
+          <li class="sdi-conflict__row">
+            <span class="sdi-conflict__name">笔记</span>
+            <span class="sdi-conflict__ops">
+              <button type="button" class="sdi-conflict__op">跳过</button>
+              <button type="button" class="sdi-conflict__op is-active">加后缀</button>
+              <button type="button" class="sdi-conflict__op">覆盖</button>
+              <button type="button" class="sdi-conflict__op">追加</button>
+            </span>
+          </li>
+        </ul>
+        <div class="sdi-card__foot">
+          <button type="button" class="sdi-card__btn">取消导入</button>
+          <button type="button" class="sdi-card__btn sdi-card__btn--primary">开始导入</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="label">⑪ 取消导入后的结果卡片</div>
+      <div class="sdi-card">
+        <div class="sdi-card__head">
+          <span class="sdi-card__title">已取消导入</span>
+          <button class="sdi-card__close" type="button" aria-label="关闭">×</button>
+        </div>
+        <div class="sdi-card__hint">没有创建任何文档。</div>
+        <div class="sdi-card__foot">
+          <button class="sdi-card__btn" type="button">打开日志</button>
+        </div>
+      </div>
+    </div>
+    <div class="cell">
+      <div class="label">⑫ 只有 PDF：统一说「附件」+ 后缀</div>
+      <div class="sdi-card">
+        <div class="sdi-card__head">
+          <span class="sdi-card__title">导入完成</span>
+          <button class="sdi-card__close" type="button" aria-label="关闭">×</button>
+        </div>
+        <div class="sdi-card__counts"><b class="sdi-ok">成功 1</b><em>0.4s</em></div>
+        <div class="sdi-card__note">已上传 1 个附件（.pdf），1 个附件找不到（.pdf），链接保持原样</div>
+        <div class="sdi-card__foot">
+          <button class="sdi-card__btn sdi-card__btn--primary" type="button">打开第一篇</button>
+          <button class="sdi-card__btn sdi-card__btn--danger" type="button">撤销本次导入（28s）</button>
+          <button class="sdi-card__btn" type="button">打开日志</button>
+        </div>
+      </div>
+    </div>
+    <div class="cell">
+      <div class="label">⑬ 收缩态：4 秒后只剩一行，撤销仍在倒计时</div>
+      <div class="sdi-card sdi-card--mini" style="justify-self: start;">
+        <div class="sdi-card__mini">
+          <button class="sdi-card__mini-main" type="button" title="点击展开详情">
+            <span class="sdi-card__mini-dot"></span>
+            <span class="sdi-card__mini-text">成功 12 · 跳过 2</span>
+            <span class="sdi-card__mini-undo">撤销 26s</span>
+          </button>
+          <button class="sdi-card__mini-close" type="button" aria-label="关闭">×</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="label">⑭ 收缩态（有失败）：标红并一直保留</div>
+      <div class="sdi-card sdi-card--mini sdi-card--has-fail" style="justify-self: start;">
+        <div class="sdi-card__mini">
+          <button class="sdi-card__mini-main" type="button" title="点击展开详情">
+            <span class="sdi-card__mini-dot is-bad"></span>
+            <span class="sdi-card__mini-text">成功 12 · 失败 1</span>
+            <span class="sdi-card__mini-undo">撤销 26s</span>
+          </button>
+          <button class="sdi-card__mini-close" type="button" aria-label="关闭">×</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="label">⑮ 收缩态（没得撤销、也没失败）：到点直接退场</div>
+      <div class="sdi-card sdi-card--mini" style="justify-self: start;">
+        <div class="sdi-card__mini">
+          <button class="sdi-card__mini-main" type="button" title="点击展开详情">
+            <span class="sdi-card__mini-dot"></span>
+            <span class="sdi-card__mini-text">成功 3 · 覆盖 3</span>
+          </button>
+          <button class="sdi-card__mini-close" type="button" aria-label="关闭">×</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="label">⑯ 零结果（冲突全跳过）：只有标题，5 秒后直接消失</div>
+      <div class="sdi-card">
+        <div class="sdi-card__full">
+          <div class="sdi-card__head">
+            <span class="sdi-card__title">已全部跳过 3 篇</span>
+            <button class="sdi-card__close" type="button" aria-label="关闭">×</button>
+          </div>
+          <ul class="sdi-card__list">
+            <li><span>周报.md</span><span>同名，已跳过</span></li>
+            <li><span>月报.md</span><span>同名，已跳过</span></li>
+            <li><span>纪要.md</span><span>同名，已跳过</span></li>
+          </ul>
+          <div class="sdi-card__log" hidden></div>
+          <div class="sdi-card__foot">
+            <button class="sdi-card__btn" type="button">打开日志</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="label">⑰ 零结果（类型不支持）：标题 + 一句「怎么办」，同样 5 秒消失</div>
+      <div class="sdi-card">
+        <div class="sdi-card__full">
+          <div class="sdi-card__head">
+            <span class="sdi-card__title">图片不能单独导入</span>
+            <button class="sdi-card__close" type="button" aria-label="关闭">×</button>
+          </div>
+          <div class="sdi-card__hint">和 md 放一起、正文里引用即可。</div>
+          <div class="sdi-card__log" hidden></div>
+          <div class="sdi-card__foot">
+            <button class="sdi-card__btn" type="button">打开日志</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

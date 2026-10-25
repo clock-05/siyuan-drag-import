@@ -1,0 +1,101 @@
+[
+  {
+    "name": "1 lsNotebooks 字段",
+    "ok": true,
+    "data": {
+      "count": 7,
+      "mine": [
+        {
+          "id": "20261024174016-poeglxf",
+          "name": "M1-probe-16009",
+          "icon": "",
+          "sort": 7,
+          "sortMode": 15,
+          "closed": false,
+          "subFileCount": 0,
+          "newFlashcardCount": 0,
+          "dueFlashcardCount": 0,
+          "flashcardCount": 0,
+          "encrypted": false,
+          "unlocked": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "2 createDocWithMd 返回值",
+    "ok": true,
+    "data": {
+      "rootId": "20261024174016-hi63wsx",
+      "childId": "20261024174016-wtsrr15",
+      "rootType": "string"
+    }
+  },
+  {
+    "name": "3 getHPathByID 形态",
+    "ok": true,
+    "data": {
+      "root": {
+        "code": 0,
+        "msg": "",
+        "data": "/探针根",
+        "_ms": 6
+      },
+      "child": {
+        "code": 0,
+        "msg": "",
+        "data": "/探针根/探针子",
+        "_ms": 12.4
+      }
+    }
+  },
+  {
+    "name": "4 getBlockInfo 反查笔记本",
+    "ok": true,
+    "data": {
+      "byDoc": {
+        "rootID": "20261024174016-wtsrr15",
+        "rootTitle": "探针子",
+        "rootTitleEmpty": false,
+        "rootIcon": "",
+        "box": "20261024174016-poeglxf",
+        "path": "/20261024174016-hi63wsx/20261024174016-wtsrr15.sy",
+        "rootChildID": "20261024174016-wtsrr15"
+      },
+      "byNotebook": {
+        "code": -1,
+        "msg": "未找到 ID 为 [20261024174016-poeglxf] 的内容块",
+        "data": null,
+        "_ms": 44.9
+      }
+    }
+  },
+  {
+    "name": "5 getIDsByHPath 传笔记本 id",
+    "ok": true,
+    "data": {
+      "root": {
+        "code": 0,
+        "msg": "",
+        "data": [
+          "20261024174016-hi63wsx"
+        ],
+        "_ms": 5.7
+      },
+      "child": {
+        "code": 0,
+        "msg": "",
+        "data": [
+          "20261024174016-wtsrr15"
+        ],
+        "_ms": 3.3
+      },
+      "missing": {
+        "code": 0,
+        "msg": "",
+        "data": [],
+        "_ms": 2.6
+      }
+    }
+  }
+]

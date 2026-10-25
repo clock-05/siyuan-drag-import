@@ -1,0 +1,33 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      # 先构建：冒烟测试加载的是 dist/index.js
+      - name: Build
+        run: npm run build
+
+      # 不跑 e2e —— 那需要一个正在运行的思源内核
+      - name: Offline tests
+        run: npm run test:offline

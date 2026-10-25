@@ -186,3 +186,33 @@ siyuan-drag-import/
 | 拖拽时 `drop` 拿到空 `files` | 事件对象在异步回调里失效，必须在同步阶段先 `Array.from(files)` 存下来 |
 | 大量文件（>200）时 IPC 排队 | M1 不优化，M3 做进度条时再一起处理 |
 | 结果卡片与思源原生弹层层级冲突 | 卡片 `z-index` 挂在 `body` 下，不进文档树 DOM |
+
+---
+
+## 6. 完成情况（2026-10-24）
+
+T0–T7 已实现，`tsc --noEmit` 干净；自动验证 84 项断言全通过（23 单测 + 17 卡片 + 18 真机链路 + 26 冒烟）。
+真实 OS 拖拽仍需人工验收，清单见 README「手动」一节。
+
+| 项 | 落点 | 备注 |
+|---|---|---|
+| T0 | `scripts/build.mjs`、`plugin.json`、`index.css`、`scripts/make-icon.mjs` | 图标用纯代码生成（无图形库），构建产物自动同步工作区 |
+| T1 | `src/logger.ts` | 路径 `<工作区>/data/storage/petal/siyuan-drag-import/logs/mmdd-HHmm.jsonl`；每批带 `batch` 字段；卡片「查看日志」直接读内存副本 |
+| T2 | `src/drop/{selectors,controller,overlay}.ts` | `document` capture + 深度计数 + 60ms 延迟；覆盖层挂 `body`，`pointer-events:none`，不插思源布局 DOM |
+| T3 | `src/source/analyze.ts` | `window.require("electron").webUtils` + `fs.statSync` 判目录；拿不到路径时退回 File 对象 |
+| T4 | `src/import/markdown.ts` | BOM → UTF-8(fatal) → GBK；frontmatter 只剥开头成对块并吃掉其后的空行；H1 相似判定容忍 8 字差 |
+| T5 | `src/import/{naming,planner}.ts` | 内存 Set（NFC+trim+小写）+ `getIDsByHPath` 原始大小写精确复核；最多试 99 次 |
+| T6 | `src/import/executor.ts` | 逐篇 `createDocWithMd`；单篇 20 MB 上限；失败原因归类（EACCES/ENOENT/ENOSPC/EBUSY） |
+| T7 | `src/ui/result.ts` | 失败项在前、跳过在后，各最多 5 条；「打开第一篇」走 `openTab`；**全是不支持时切独立状态**（标题 + 引导语，不显示 0/1/0 计数与置灰按钮，真机反馈后补） |
+
+### 对设计的一处修正（需确认）
+
+设计 §3.1 写「文档树之外的文件 drop 一律 `preventDefault()`」。实现里改成：**编辑器 `.protyle` 内的 drop 放行**，只对树和编辑器之外的区域做兜底。
+
+原因：capture 阶段一旦在编辑器里 `preventDefault()`，思源自己的「拖图入正文」就被打死，和 T2 验收「拖到编辑器保持原生插图」直接冲突；而窗口导航风险只在没人处理的区域才成立。
+
+### 仍未关闭
+
+- T8（M0 遗留的真机复核）：`getPathForFile` 对文件夹的返回值、`C:\Program Files` 拖入的 EPERM 表现，需要一次真实拖拽。实现里已按「拿不到路径也降级可用」写了容错。
+- T1 的「故意让某一步抛错」验收：冒烟测试里已用 `steps` 覆盖失败路径的日志格式，但没在真机上真造一次错。
+

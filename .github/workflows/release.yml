@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # 集市按 package.zip 安装，版本号必须和 tag 一致，否则用户看到的版本会对不上
+      - name: Verify tag matches plugin.json
+        run: |
+          node -e "const v=require('./plugin.json').version; const t=process.env.GITHUB_REF_NAME.replace(/^v/, ''); if (v !== t) { console.error('tag ' + t + ' != plugin.json ' + v); process.exit(1); }"
+
+      - name: Offline tests
+        run: npm run test:offline
+
+      - name: Pack package.zip
+        run: |
+          cd dist
+          zip -r ../package.zip .
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: package.zip
+          fail_on_unmatched_files: true
+          generate_release_notes: true
