@@ -215,7 +215,9 @@ module.exports = class DragImport extends Plugin {
       }
 
       const analyzeStarted = Date.now();
-      const analysis = analyzeSources(files, batch);
+      const analysis = analyzeSources(files, batch, {
+        skipRootFolder: this.settings.skipRootFolder,
+      });
       const analyzeMs = Date.now() - analyzeStarted;
       skipped.push(...analysis.rejected);
       batch?.event("analyze", "done", {

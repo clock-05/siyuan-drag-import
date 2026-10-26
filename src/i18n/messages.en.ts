@@ -122,6 +122,9 @@ export const en: typeof zh = {
     uploadImages: "Upload attachments",
     uploadImagesDesc:
       "Copy referenced images, PDFs and other local files into assets and rewrite the links. Turn off to keep the original relative paths (images will then fail to load).",
+    skipRootFolder: "Don't create a document for the folder",
+    skipRootFolderDesc:
+      "Put a dropped folder's contents straight into the drop target instead of creating an empty document for the folder itself. Sub-folders still become documents; zip archives are unaffected.",
     removeH1: "Remove duplicate first H1",
     removeH1Desc: "Drop the first heading when it matches the document name, so the title isn't shown twice.",
     wikilinks: "Convert Obsidian wiki links",

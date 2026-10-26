@@ -327,6 +327,46 @@ try {
   const parentAgain = await api("/api/filetree/getIDsByHPath", { notebook: nbId, path: "/项目A" });
   check("父文档仍是 1 个（复用不新建）", (parentAgain?.data ?? []).length === 1, JSON.stringify(parentAgain));
 
+  /* ---------- skipRoot：不为被拖的文件夹建文档 ---------- */
+  const skipRootDir = join(workDir, "项目B");
+  mkdirSync(join(skipRootDir, "sub"), { recursive: true });
+  writeFileSync(join(skipRootDir, "d.md"), "# d\n\n丁");
+  writeFileSync(join(skipRootDir, "sub", "e.md"), "# e\n\n戊");
+
+  const skipRootAnalysis = analyzeSources([fileAt(skipRootDir, "", "项目B")], null, { skipRootFolder: true });
+  check(
+    "skipRoot：目录段去掉被拖的文件夹",
+    skipRootAnalysis.md.every((item) => !item.dirs.includes("项目B")),
+    JSON.stringify(skipRootAnalysis.md.map((i) => i.dirs)),
+  );
+  check(
+    "skipRoot：子文件夹照常保留",
+    skipRootAnalysis.md.some((item) => item.name === "e.md" && item.dirs.join("/") === "sub"),
+    JSON.stringify(skipRootAnalysis.md.map((i) => [i.name, i.dirs])),
+  );
+  // 默认（设置关）必须还是原来那套，不能被这次改动带偏
+  const skipRootOff = analyzeSources([fileAt(skipRootDir, "", "项目B")], null);
+  check(
+    "skipRoot 关闭时维持原行为",
+    skipRootOff.md.every((item) => item.dirs[0] === "项目B"),
+    JSON.stringify(skipRootOff.md.map((i) => i.dirs)),
+  );
+
+  const skipRootPlan = await resolvePlan(await scanPlan(skipRootAnalysis.md, target, null), { fallback: "suffix" });
+  check(
+    "skipRoot：hpath 少一层",
+    JSON.stringify(skipRootPlan.items.map((item) => item.hpath).sort()) === JSON.stringify(["/d", "/sub/e"]),
+    JSON.stringify(skipRootPlan.items.map((i) => i.hpath)),
+  );
+  const skipRootRun = await runPlan(skipRootPlan.items, nbId, null);
+  check("skipRoot：2 篇全部建成", skipRootRun.ok.length === 2 && skipRootRun.failed.length === 0, JSON.stringify(skipRootRun.failed));
+  const skipRootParentIds = await api("/api/filetree/getIDsByHPath", { notebook: nbId, path: "/项目B" });
+  check("skipRoot：文件夹本身没建文档", (skipRootParentIds?.data ?? []).length === 0, JSON.stringify(skipRootParentIds));
+  const skipRootLeafIds = await api("/api/filetree/getIDsByHPath", { notebook: nbId, path: "/d" });
+  check("skipRoot：内容是直接建在目标下的", (skipRootLeafIds?.data ?? []).length === 1, JSON.stringify(skipRootLeafIds));
+  const skipRootSubIds = await api("/api/filetree/getIDsByHPath", { notebook: nbId, path: "/sub/e" });
+  check("skipRoot：子文件夹仍还原成文档", (skipRootSubIds?.data ?? []).length === 1, JSON.stringify(skipRootSubIds));
+
   /* ---------- M3：压缩包 ---------- */
   const zipPath = join(workDir, "压缩包A.zip");
   writeFileSync(

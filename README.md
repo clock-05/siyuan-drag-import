@@ -48,6 +48,7 @@ Windows desktop only — the plugin reads the local file system. Developed and f
 | Setting                     | Default | Meaning                                     |
 | --------------------------- | ------- | ------------------------------------------- |
 | Upload attachments          | On      | Off keeps the original paths (images break)  |
+| No document for the folder  | Off     | Drop a folder and its contents land directly in the target; the folder itself doesn't become a document |
 | Remove duplicate first H1    | On      | Drop the heading when it repeats the name    |
 | Convert Obsidian wiki links | On      | `[[note]]` → block reference within the batch |
 | Default handling for duplicates | Rename | Pre-selected on the conflict card        |

@@ -156,6 +156,9 @@ check("太大夹到 300 秒", norm({ undoWindowSeconds: 9999 }).undoWindowSecond
 check("坏值退回下限", norm({ undoWindowSeconds: "abc" }).undoWindowSeconds, 10);
 check("迁移后不残留旧键", "undoWindowMinutes" in norm({ undoWindowMinutes: 5 }), false);
 check("冲突默认值非法时回退", norm({ conflictDefault: "乱写" }).conflictDefault, "suffix");
+check("skipRootFolder 默认关（保持旧行为）", norm({}).skipRootFolder, false);
+check("skipRootFolder 存 true 才开", norm({ skipRootFolder: true }).skipRootFolder, true);
+check("skipRootFolder 非布尔值不误开", norm({ skipRootFolder: "yes" }).skipRootFolder, false);
 
 /* ---------- 设置面板：恢复默认 ---------- */
 // 桩 Setting 不会自己建控件，这里手动把每个 item 的元素建出来并挂进 DOM
@@ -177,17 +180,17 @@ for (const node of nodes) {
 }
 document.body.append(box);
 
-check("设置项共 7 项", panel.items.length, 7);
-check("输入框初始显示 50", nodes[4].value, "50");
-nodes[6].dispatchEvent(new dom.window.Event("click"));
+check("设置项共 8 项", panel.items.length, 8);
+check("输入框初始显示 50", nodes[5].value, "50");
+nodes[7].dispatchEvent(new dom.window.Event("click"));
 check("恢复默认：大小上限回到 20", live.maxFileMB, 20);
 check("恢复默认：撤销窗口回到 30 秒", live.undoWindowSeconds, 30);
 check("恢复默认：冲突策略回到加后缀", live.conflictDefault, "suffix");
 check("恢复默认：开关回到开", live.uploadImages, true);
 check("恢复默认会保存一次", saves, 1);
 // 控件本身也要跟着变，不然用户看到的是旧值
-check("输入框同步成 20", nodes[4].value, "20");
-check("下拉框同步成 suffix", nodes[3].value, "suffix");
+check("输入框同步成 20", nodes[5].value, "20");
+check("下拉框同步成 suffix", nodes[4].value, "suffix");
 check("开关同步成选中", nodes[0].checked, true);
 
 /* ---------- mapLimit：查同名的并发器 ---------- */

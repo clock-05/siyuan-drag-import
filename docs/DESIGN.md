@@ -830,3 +830,15 @@ logger.ts           JSONL 落盘 + 清理
 - **设置入口只留一处做不到**：思源顶栏「插件」菜单的条目和集市「已下载」的齿轮，判定是同一个
   `hasPluginSetting(plugin)`（`Boolean(plugin.setting) || plugin.openSetting !== Plugin.prototype.openSetting`，
   见 `app/src/plugin/index.ts`）。要么两处都有，要么两处都没有，没有单开关。保持现状。
+
+**v1.16（2026-10-26，1.0.3：skipRoot 与并发实测）**：
+
+- 新增设置「**文件夹本身不建文档**」（`skipRootFolder`，默认关 = 保持原行为）：
+  拖入文件夹时只去掉**被拖的那一层**（`collectFolder` 里不再拼 `folderName`），
+  子文件夹照常成篇。对应内核 `importStdMd` 的 `skipRoot` 参数，但语义只作用于文件夹，
+  zip 不受影响（zip 解出来的顶层目录本来就会剥）。
+- **建文档不能靠并发提速**：实测 60 篇串行 2223ms（37.0ms/篇）、4 路并发 2048ms（34.1ms/篇），
+  只快 9%。原因是内核 `model.CreateWithMarkdown` 第一行就 `createDocLock.Lock()`，
+  从 Lute 解析到 `FlushTxQueue` 全在锁内，并发请求只是排队。**不要再试并发建文档。**
+  单篇 33–37ms 就是这条链路的成本下限；想更快只能走内核批量导入（`importStdMd`），
+  而那条路没有撤销/冲突策略/逐篇失败，已评估否决。

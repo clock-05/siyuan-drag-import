@@ -134,6 +134,9 @@ export const zh = {
     uploadImages: "上传附件",
     uploadImagesDesc:
       "把正文里引用的本地图片、PDF 等文件传到 assets 并改写链接；关掉则保留原始相对路径（图片会显示不出来）",
+    skipRootFolder: "文件夹本身不建文档",
+    skipRootFolderDesc:
+      "拖入文件夹时，里面的文件直接放到拖放位置，不为外层文件夹建一篇空文档；子文件夹照常建。zip 不受影响。",
     removeH1: "移除重复的首行 H1",
     wikilinks: "转换 Obsidian 双链",
     removeH1Desc: "首行标题与文档名相同时删掉它，避免树上一个标题、正文又一个",

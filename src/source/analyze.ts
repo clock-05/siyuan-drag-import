@@ -126,7 +126,12 @@ export function pendingReadHint(files: File[]): PendingStage | null {
 }
 
 /** 文件夹 → md 清单 + 汇总后的跳过项（不是每个 png 都占一行） */
-function collectFolder(folderPath: string, folderName: string, batch: LogBatch | null): AnalyzeResult {
+function collectFolder(
+  folderPath: string,
+  folderName: string,
+  batch: LogBatch | null,
+  skipRoot: boolean,
+): AnalyzeResult {
   const walked = walkFolder(folderPath);
   const md: MdSource[] = [];
   const rejected: RejectedSource[] = [];
@@ -136,8 +141,9 @@ function collectFolder(folderPath: string, folderName: string, batch: LogBatch |
       name: file.name,
       path: file.path,
       size: file.size,
-      // 被拖的文件夹自己也是一层父文档（设计 §5.2）
-      dirs: [folderName, ...file.dirs],
+      // 被拖的文件夹自己也是一层父文档（设计 §5.2）。
+      // skipRoot 时去掉这一层：只去掉**被拖的那个**，里面的子文件夹照常成篇。
+      dirs: skipRoot ? file.dirs : [folderName, ...file.dirs],
       assets: createDiskAssetReader(file.path, folderPath) ?? undefined,
     });
   }
@@ -205,17 +211,28 @@ function collectFolder(folderPath: string, folderName: string, batch: LogBatch |
   return { md, rejected };
 }
 
+/** 读取阶段的可选行为（都来自设置，默认值与旧行为一致） */
+export interface AnalyzeOptions {
+  /** 拖入文件夹时不为文件夹本身建文档 */
+  skipRootFolder?: boolean;
+}
+
 /** DataTransfer 的 File 列表 → 可导入的 md + 明确的不支持清单 */
-export function analyzeSources(files: File[], batch: LogBatch | null): AnalyzeResult {
+export function analyzeSources(
+  files: File[],
+  batch: LogBatch | null,
+  options: AnalyzeOptions = {},
+): AnalyzeResult {
   const md: MdSource[] = [];
   const rejected: RejectedSource[] = [];
+  const skipRoot = options.skipRootFolder === true;
 
   for (const file of files) {
     const path = pathOf(file);
     const name = (file.name || baseName(path) || "").trim() || m().reject.untitledFile;
 
     if (statIsDirectory(path)) {
-      const folder = collectFolder(path, name, batch);
+      const folder = collectFolder(path, name, batch, skipRoot);
       md.push(...folder.md);
       rejected.push(...folder.rejected);
       continue;

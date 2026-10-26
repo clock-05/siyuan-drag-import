@@ -4,6 +4,11 @@ import type { ConflictChoice } from "./import/planner";
 
 export interface Settings {
   uploadImages: boolean;
+  /**
+   * 拖入文件夹时不为「这个文件夹本身」建文档，里面的内容直接落到拖放位置。
+   * 默认 false：文件夹也是一层父文档（拖 A 得到 A/…，与思源原生导入一致）。
+   */
+  skipRootFolder: boolean;
   removeDuplicateH1: boolean;
   /** 把 `[[笔记]]` 换成思源块引用（只对本批内能唯一命中的目标生效） */
   convertWikilinks: boolean;
@@ -17,6 +22,7 @@ export const SETTINGS_KEY = "settings";
 
 export const DEFAULT_SETTINGS: Settings = {
   uploadImages: true,
+  skipRootFolder: false,
   removeDuplicateH1: true,
   convertWikilinks: true,
   maxFileMB: 20,
@@ -73,6 +79,7 @@ export function normalizeSettings(raw: unknown): Settings {
   merged.undoWindowSeconds = clamp(Number(merged.undoWindowSeconds), 10, 300);
 
   merged.uploadImages = merged.uploadImages !== false;
+  merged.skipRootFolder = merged.skipRootFolder === true;
   merged.removeDuplicateH1 = merged.removeDuplicateH1 !== false;
   merged.convertWikilinks = merged.convertWikilinks !== false;
   return merged;
@@ -139,6 +146,19 @@ export function createSettingPanel(settings: Settings, onChange: () => void): Se
         () => settings.uploadImages,
         (value) => {
           settings.uploadImages = value;
+        },
+        track,
+      ),
+  });
+
+  panel.addItem({
+    title: text.skipRootFolder,
+    description: text.skipRootFolderDesc,
+    createActionElement: () =>
+      checkbox(
+        () => settings.skipRootFolder,
+        (value) => {
+          settings.skipRootFolder = value;
         },
         track,
       ),
