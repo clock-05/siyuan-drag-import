@@ -16,8 +16,8 @@
     "zh-CN": "拖拽导入"
   },
   "description": {
-    "default": "SiYuan's built-in import takes a few clicks: open the menu in the document tree and pick a folder or file. Drag the folder or file straight from your file manager onto the tree instead — same result, with the folder structure recreated and images and attachments uploaded. A result card appears afterwards, with undo, retry of failed items, and the import log.",
-    "zh-CN": "思源自带的导入要在文档树里点几下选文件。这里直接用资源管理器把文件或文件夹拖到文档树上，导入结果与官方相同，层级自动还原，图片与附件一并上传。导入结束后弹出结果卡片，可撤销、重试失败项、打开日志。"
+    "default": "Supports dragging Markdown files and folders directly from your file manager onto SiYuan's document tree.",
+    "zh-CN": "支持直接把markdown文件/文件夹从系统文件夹里拖拽到思源文档树上。"
   },
   "readme": {
     "default": "README.md",

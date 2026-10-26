@@ -21,31 +21,59 @@ if (!version || !/^\d+\.\d+\.\d+$/.test(version)) {
   process.exit(1);
 }
 
+// Windows 上 npm 是 npm.cmd，execFileSync 不带 shell 找不到；
+// 但开 shell 后参数是拼成一行交给 cmd.exe 的，带空格的参数（提交信息）会被拆词，
+// 所以这里自己加引号。
+const quote = (arg) =>
+  process.platform === "win32" && /[\s"^&|<>]/.test(arg)
+    ? `"${arg.replace(/"/g, '\\"')}"`
+    : arg;
 const run = (cmd, args) =>
-  execFileSync(cmd, args, {
+  execFileSync(cmd, args.map(quote), {
     cwd: root,
     encoding: "utf-8",
     stdio: "pipe",
-    // Windows 上 npm 是 npm.cmd，execFileSync 不带 shell 找不到
     shell: process.platform === "win32",
   }).trim();
 const say = (msg) => console.log(msg);
 
-// 1. 版本号：package.json + plugin.json
+// 1. 版本号：package.json + plugin.json + package-lock.json
 const pkgPath = path.join(root, "package.json");
 const manPath = path.join(root, "plugin.json");
+const lockPath = path.join(root, "package-lock.json");
 const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
 const man = JSON.parse(fs.readFileSync(manPath, "utf-8"));
 const old = pkg.version;
 if (old === version) {
-  say(`版本号已经是 ${version}，请给一个新版本号。`);
-  process.exit(1);
+  // 版本号已经手动改好了 —— 跳过改号那步，继续走构建与发布。
+  // 三处版本号必须一致，否则集市的 tag 校验会失败。
+  if (man.version !== version) {
+    console.error(`plugin.json 是 ${man.version}，与 package.json 的 ${version} 不一致。`);
+    process.exit(1);
+  }
+  if (fs.existsSync(lockPath)) {
+    const lock = JSON.parse(fs.readFileSync(lockPath, "utf-8"));
+    if (lock.version !== version) {
+      lock.version = version;
+      if (lock.packages && lock.packages[""]) lock.packages[""].version = version;
+      fs.writeFileSync(lockPath, JSON.stringify(lock, null, 2) + "\n");
+      say(`package-lock.json 版本号 → ${version}`);
+    }
+  }
+  say(`版本号已是 ${version}，跳过改号`);
+} else {
+  pkg.version = version;
+  man.version = version;
+  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
+  fs.writeFileSync(manPath, JSON.stringify(man, null, 2) + "\n");
+  if (fs.existsSync(lockPath)) {
+    const lock = JSON.parse(fs.readFileSync(lockPath, "utf-8"));
+    lock.version = version;
+    if (lock.packages && lock.packages[""]) lock.packages[""].version = version;
+    fs.writeFileSync(lockPath, JSON.stringify(lock, null, 2) + "\n");
+  }
+  say(`版本号 ${old} → ${version}`);
 }
-pkg.version = version;
-man.version = version;
-fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
-fs.writeFileSync(manPath, JSON.stringify(man, null, 2) + "\n");
-say(`版本号 ${old} → ${version}`);
 
 // 2. 构建并检查产物结构
 run("npm", ["run", "build"]);
