@@ -9,12 +9,37 @@ export interface UndoResult {
   restored: number;
   failed: number;
   docs: number;
+  /** 撤销失败的目标（文档名或目录路径）：告诉用户哪几篇没撤掉 */
+  failedTargets: string[];
 }
 
 export interface RestoreTarget {
   id: string;
   /** 导入前的原文（kramdown），撤销时原样写回 */
   before: string;
+  /** 文档名，撤销失败时用来告诉用户是哪一篇 */
+  name?: string;
+}
+
+/**
+ * 回滚的完整结果。
+ * 和 UndoResult 分开是因为多了一个「撤不回来」的口子：
+ * 覆盖 / 追加时没拿到快照（超出快照预算，或取 kramdown 失败），
+ * 那几篇的正文已经被改过了，却写不回原文。装作还原了就是在骗人，所以单独报出来。
+ */
+export interface RollbackInfo {
+  /** 删掉的文档数 */
+  removed: number;
+  /** 写回快照还原的文档数 */
+  restored: number;
+  /** 回滚本身失败的文档数（删不掉 / 写不回） */
+  failed: number;
+  /** 覆盖或追加过、但没有快照所以还原不了的文档数 */
+  unrestored: number;
+  /** 撤不回来的文档名 */
+  unrestoredNames: string[];
+  /** 撤销失败的目标 */
+  failedTargets: string[];
 }
 
 /**
@@ -44,6 +69,7 @@ export async function undoImport(options: {
   let targets = 0;
   let removed = 0;
   let failed = 0;
+  const failedTargets: string[] = [];
 
   for (const dir of topDirs) {
     let ids: string[];
@@ -68,6 +94,7 @@ export async function undoImport(options: {
         removed += weight;
       } catch {
         failed += weight;
+        failedTargets.push(dir);
       }
     }
   }
@@ -83,6 +110,7 @@ export async function undoImport(options: {
       removed += 1;
     } catch {
       failed += 1;
+      failedTargets.push(doc.hpath);
     }
   }
 
@@ -93,8 +121,62 @@ export async function undoImport(options: {
       done += 1;
     } catch {
       failed += 1;
+      failedTargets.push(doc.name ?? doc.id);
     }
   }
 
-  return { targets, removed, restored: done, failed, docs: created.length };
+  return { targets, removed, restored: done, failed, docs: created.length, failedTargets };
+}
+
+/** 一条已经写进库的记录（回滚只需要这些字段） */
+export interface RollbackTarget {
+  id: string;
+  hpath: string;
+  name: string;
+  mode: "create" | "overwrite" | "append";
+  /** 覆盖 / 追加前的原文快照；没有就还原不了 */
+  before?: string;
+}
+/**
+ * 把一批已经写进去的东西整体撤回去。
+ *
+ * 取消导入走的就是这条路：用户点「取消」的语义是「这次导入没发生过」，
+ * 不是「导入到一半停下」。所以新建的删掉、覆盖 / 追加的写回导入前的原文。
+ *
+ * 撤不回来的有两种，都如实报出去：
+ * - 覆盖 / 追加时没拿到快照（超出快照预算，或取 kramdown 失败）→ 正文已经改过了
+ * - 删除 / 写回本身失败（内核报错）
+ */
+export async function rollbackBatch(options: {
+  notebook: string;
+  targets: RollbackTarget[];
+  /** 本批新建的顶层目录：删它一次就够，删父会连带子文档 */
+  autoDirs: string[];
+}): Promise<RollbackInfo> {
+  const created = options.targets
+    .filter((item) => item.mode === "create")
+    .map((item) => ({ id: item.id, hpath: item.hpath }));
+  const restored = options.targets
+    .filter((item) => item.mode !== "create" && item.before)
+    .map((item) => ({ id: item.id, before: item.before as string, name: item.name }));
+  // 覆盖 / 追加过、但没拿到快照的：正文已经改过了，撤不回来
+  const unrestoredNames = options.targets
+    .filter((item) => item.mode !== "create" && !item.before)
+    .map((item) => item.name);
+
+  const outcome = await undoImport({
+    notebook: options.notebook,
+    created,
+    restored,
+    autoDirs: options.autoDirs,
+  });
+
+  return {
+    removed: outcome.removed,
+    restored: outcome.restored,
+    failed: outcome.failed,
+    unrestored: unrestoredNames.length,
+    unrestoredNames,
+    failedTargets: outcome.failedTargets,
+  };
 }

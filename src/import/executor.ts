@@ -273,7 +273,8 @@ export async function runPlan(
     }
   }
 
-  const links = await patchWikilinks(pendingLinks, ok, batch);
+  // 取消的批次马上要整体回滚，不用再费劲把 [[双链]] 改写成引用了
+  const links = cancelled ? 0 : await patchWikilinks(pendingLinks, ok, batch);
 
   return { ok, failed, cancelled, assets, snapshotOverflow, links };
 }

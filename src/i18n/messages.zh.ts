@@ -14,6 +14,8 @@ export const zh = {
   common: {
     close: "关闭",
     cancelImport: "取消导入",
+    /** 进度卡片上的取消：点下去等于撤销，整批不留痕迹 */
+    cancelAndUndo: "取消并撤销",
     openLog: "打开日志",
     noExt: "无后缀",
     listSep: "、",
@@ -37,12 +39,20 @@ export const zh = {
     progressRetry: "重试失败项",
     /** 进度条上的剩余时间；只在剩余够长时拼上去 */
     eta: (seconds: number) => ` · 约 ${seconds} 秒`,
-    cancelling: "正在取消…",
+    cancelling: "正在撤销…",
 
     titleDone: "导入完成",
     titleFailed: "导入失败",
     titleCancelled: "已取消导入",
-    cancelledPartial: (count: number) => `已导入 ${count} 篇，其余未执行。`,
+    /** 取消 = 撤销：整批不留痕迹，卡片说明撤回了什么 */
+    cancelledRolledBack: (removed: number, restored: number) =>
+      `已撤销本次导入：删除 ${removed} 篇 · 还原 ${restored} 篇`,
+    /** 收缩成小条后那一行 */
+    cancelledMini: "已撤销",
+    cancelledRollbackFailed: (count: number) => `${count} 篇未能撤销`,
+    cancelledUnrestored: (count: number) => `${count} 篇原内容无法还原`,
+    cancelledUnrestoredHint: "这些文档在导入前被覆盖或追加过，但没有留下原文快照",
+    cancelledRollbackFailedHint: "内核没有接受删除或写回，请到文档树里手动处理",
 
     okCount: (count: number) => `成功 ${count}`,
     okDetail: (overwritten: number, appended: number) => {

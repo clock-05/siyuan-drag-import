@@ -190,9 +190,10 @@ card.showProgress(48, "项目A", () => {
 });
 const cancelBtn = document.querySelector('[data-act="cancel"]');
 check("进度卡片有取消按钮", Boolean(cancelBtn));
+check("取消按钮说明它等于撤销", cancelBtn.textContent === "取消并撤销", cancelBtn.textContent);
 cancelBtn.dispatchEvent(new dom.window.Event("click"));
 check("点取消会通知外层", cancelAsked === 1);
-check("取消后按钮置灰防重复", cancelBtn.disabled === true && cancelBtn.textContent === "正在取消…");
+check("取消后按钮置灰防重复", cancelBtn.disabled === true && cancelBtn.textContent === "正在撤销…");
 cancelBtn.dispatchEvent(new dom.window.Event("click"));
 check("重复点不会二次触发", cancelAsked === 1);
 
@@ -377,27 +378,58 @@ check(
   expiredBtn.textContent,
 );
 
-// 用户在冲突卡片上取消了
+// 用户在冲突卡片上取消了（还没开始导，一篇都没建）
 card.show({ ...summary, ok: [], failed: [], skipped: [], cancelled: true });
 const cancelEl = document.querySelector(".sdi-card");
 check("取消态标题", cancelEl.querySelector(".sdi-card__title").textContent === "已取消导入");
 check("取消态不再重复解释（标题已说完）", cancelEl.querySelector(".sdi-card__hint") === null);
 check("取消态不显示计数与按钮", cancelEl.querySelector(".sdi-card__counts") === null && cancelEl.querySelector('[data-act="open"]') === null);
 
-// 中途取消：已经建了一部分
-card.show({ ...summary, cancelled: true });
-const partialEl = document.querySelector(".sdi-card");
-check("取消但已建了一部分：标题一致", partialEl.querySelector(".sdi-card__title").textContent === "已取消导入");
-check("取消但已建了一部分：计数保留", (partialEl.querySelector(".sdi-card__counts")?.textContent ?? "").includes("成功 2"));
-
-// 中途取消也要能撤销：已经建好的那批不该只能手动删
-card.show({ ...summary, cancelled: true }, { onUndo: async () => "已删除 2 篇" });
+// 导入中途取消 = 撤销：整批不留痕迹，卡片说明撤回了什么
+card.show({
+  ...summary,
+  ok: [],
+  failed: [],
+  skipped: [],
+  cancelled: true,
+  rolledBack: { removed: 2, restored: 1, failed: 0, unrestored: 0 },
+});
+const rollbackEl = document.querySelector(".sdi-card");
 check(
-  "取消后仍能撤销已建好的部分",
-  Boolean(document.querySelector('[data-act="undo"]')),
+  "取消后标题是「已取消导入」",
+  rollbackEl.querySelector(".sdi-card__title").textContent === "已取消导入",
 );
-check("取消但已建了一部分：说明剩余未执行", (partialEl.querySelector(".sdi-card__hint")?.textContent ?? "").includes("已导入 2 篇"));
-check("取消后仍能打开第一篇", Boolean(partialEl.querySelector('[data-act="open"]')));
+check(
+  "取消后说明撤回了什么",
+  (rollbackEl.querySelector(".sdi-card__hint")?.textContent ?? "").includes("已撤销本次导入"),
+  rollbackEl.querySelector(".sdi-card__hint")?.textContent,
+);
+check(
+  "取消后没有「打开第一篇」（文档已被删）",
+  rollbackEl.querySelector('[data-act="open"]') === null,
+);
+check("取消后没有撤销按钮（已经撤过了）", rollbackEl.querySelector('[data-act="undo"]') === null);
+
+// 撤不回来的要点名：用户得知道哪几篇正文还留着被改过的样子
+card.show({
+  ...summary,
+  ok: [],
+  failed: [],
+  skipped: [],
+  cancelled: true,
+  rolledBack: { removed: 2, restored: 0, failed: 0, unrestored: 1 },
+  problems: [{ name: "被覆盖的那篇", reason: "这些文档在导入前被覆盖或追加过，但没有留下原文快照" }],
+});
+const problemEl = document.querySelector(".sdi-card");
+check(
+  "撤不回来的文档列出来",
+  (problemEl.querySelector(".sdi-card__list")?.textContent ?? "").includes("被覆盖的那篇"),
+  problemEl.querySelector(".sdi-card__list")?.textContent,
+);
+check(
+  "撤不回来的算「有失败」，卡片不自己消失",
+  problemEl.classList.contains("sdi-card--has-fail"),
+);
 
 // 拖了个没有 md 的文件夹
 card.show({
@@ -510,7 +542,7 @@ check("零结果卡片这会儿还在（留时间读提示）", document.querySe
 await wait(50);
 check("零结果卡片到点直接消失", document.querySelector(".sdi-card") === null);
 
-// 点「取消导入」也一样：没有小条这一站
+// 点「取消导入」（冲突卡片那次，压根没开始导）：没有小条这一站
 card.show({ ...summary, ok: [], failed: [], skipped: [], cancelled: true }, { collapseMs: 20, nothingMs: 60 });
 await wait(30);
 check(
@@ -519,6 +551,28 @@ check(
 );
 await wait(50);
 check("取消导入到点消失", document.querySelector(".sdi-card") === null);
+
+// 导入中途取消（已回滚）：有撤销结果要看，照常收缩成小条
+card.show(
+  {
+    ...summary,
+    ok: [],
+    failed: [],
+    skipped: [],
+    cancelled: true,
+    rolledBack: { removed: 3, restored: 1, failed: 0, unrestored: 0 },
+  },
+  { collapseMs: 20, nothingMs: 60 },
+);
+await wait(40);
+check("取消回滚后收缩成小条", document.querySelector(".sdi-card--mini") !== null);
+check(
+  "小条上写「已撤销」而不是「成功 0」",
+  (document.querySelector(".sdi-card__mini-text")?.textContent ?? "") === "已撤销",
+  document.querySelector(".sdi-card__mini-text")?.textContent,
+);
+await wait(60);
+check("取消回滚后没有待办，小条自己退场", document.querySelector(".sdi-card") === null);
 
 // 回归：零结果卡片的计时是「退场计时」，不能被 hover 取消，否则鼠标停着就永远不走
 const pointerEnter = (node) => node.dispatchEvent(new dom.window.Event("pointerenter"));

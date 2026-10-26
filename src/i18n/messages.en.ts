@@ -8,6 +8,8 @@ export const en: typeof zh = {
   common: {
     close: "Close",
     cancelImport: "Cancel import",
+    /** Cancel button on the progress card: same as undo, nothing is kept */
+    cancelAndUndo: "Cancel and undo",
     openLog: "Open log",
     noExt: "no extension",
     listSep: ", ",
@@ -29,12 +31,20 @@ export const en: typeof zh = {
     count: (count: number) => (count === 1 ? "1 file" : `${count} files`),
     progressRetry: "Retrying failed items",
     eta: (seconds) => ` · ~${seconds}s`,
-    cancelling: "Cancelling…",
+    cancelling: "Undoing…",
 
     titleDone: "Import complete",
     titleFailed: "Import failed",
     titleCancelled: "Import cancelled",
-    cancelledPartial: (count) => (count === 1 ? "1 imported, the rest skipped." : `${count} imported, the rest skipped.`),
+    /** Cancel = undo: nothing is kept, the card says what was rolled back */
+    cancelledRolledBack: (removed: number, restored: number) =>
+      `Import undone: ${removed} deleted · ${restored} restored`,
+    /** The one-line bar after the card collapses */
+    cancelledMini: "Undone",
+    cancelledRollbackFailed: (count: number) => `${count} could not be undone`,
+    cancelledUnrestored: (count: number) => `${count} could not be restored`,
+    cancelledUnrestoredHint: "These were overwritten or appended to before the import, and no snapshot was kept",
+    cancelledRollbackFailedHint: "The kernel rejected the delete or the write-back — handle them in the document tree",
 
     okCount: (count) => `${count} imported`,
     okDetail: (overwritten, appended) => {

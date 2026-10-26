@@ -20,6 +20,25 @@ export interface Summary {
   undoOff?: boolean;
   /** 本批转成思源块引用的 `[[双链]]` 处数（0 就不显示） */
   links?: number;
+  /**
+   * 取消导入后的回滚结果。
+   * 取消 = 撤销：整批不留痕迹，这个字段说明撤回了什么、什么没撤回来。
+   */
+  rolledBack?: RollbackSummary;
+  /** 取消后仍需要用户处理的问题（撤不回来的文档） */
+  problems?: FailureItem[];
+}
+
+/** 取消导入后的回滚结果（给卡片显示用） */
+export interface RollbackSummary {
+  /** 删掉的文档数 */
+  removed: number;
+  /** 写回快照还原的文档数 */
+  restored: number;
+  /** 回滚失败的文档数 */
+  failed: number;
+  /** 覆盖/追加过、但没有快照所以还原不了的文档数 */
+  unrestored: number;
 }
 
 export interface ShowOptions {
@@ -298,7 +317,7 @@ export class ResultCard {
       ${
         onCancel
           ? `<div class="sdi-card__foot"><button class="sdi-card__btn" type="button" data-act="cancel">${esc(
-              m().common.cancelImport,
+              m().common.cancelAndUndo,
             )}</button></div>`
           : ""
       }
@@ -353,15 +372,21 @@ export class ResultCard {
     this.destroy();
 
     const cancelled = Boolean(summary.cancelled);
+    const rolledBack = summary.rolledBack;
     const okCount = summary.ok.length;
     const failCount = summary.failed.length;
     const skipCount = summary.skipped.length;
+    // 取消后撤不回来的文档：正文还留着被改过的样子，得让用户知道是哪几篇
+    const problems = summary.problems ?? [];
+    const problemCount = problems.length;
     const overwritten = summary.ok.filter((item) => item.mode === "overwrite").length;
     const appended = summary.ok.filter((item) => item.mode === "append").length;
     const createdCount = summary.ok.filter((item) => item.mode === "create").length;
     const nothingImported = !cancelled && okCount === 0 && failCount === 0;
-    // 一篇都没产出（取消 / 全跳过 / 全是不支持的类型）：这类卡片不收缩
-    const noResult = okCount === 0 && failCount === 0;
+    // 一篇都没产出（取消 / 全跳过 / 全是不支持的类型）：这类卡片不收缩。
+    // 导入中途取消不一样：它报告的是一次撤销动作的结果（删了几篇、还原了几篇），
+    // 要让人看清，所以照常收缩成小条；只有冲突卡片那次「取消」（压根没开始导）算零结果。
+    const noResult = okCount === 0 && failCount === 0 && problemCount === 0 && !rolledBack;
     const text = m();
     const cardText = text.card;
     const unsupported = nothingImported ? describeUnsupported(summary.skipped) : null;
@@ -372,9 +397,10 @@ export class ResultCard {
         : okCount > 0
           ? cardText.titleDone
           : cardText.titleFailed;
+    // 取消 = 撤销：说明撤回了什么，而不是「已导入 N 篇」
     const hint = cancelled
-      ? okCount > 0
-        ? cardText.cancelledPartial(okCount)
+      ? rolledBack && (rolledBack.removed > 0 || rolledBack.restored > 0)
+        ? cardText.cancelledRolledBack(rolledBack.removed, rolledBack.restored)
         : "" // 标题「已取消导入」已经把话说完了
       : unsupported?.hint ?? "";
 
@@ -387,6 +413,14 @@ export class ResultCard {
       );
     }
     for (const item of cancelled ? [] : summary.skipped.slice(0, MAX_ROWS)) {
+      rows.push(
+        `<li><span title="${esc(item.name)}">${esc(item.name)}</span><span title="${esc(item.reason)}">${esc(
+          item.reason,
+        )}</span></li>`,
+      );
+    }
+    // 取消后撤不回来的：要让用户知道哪些文档还留着被改过的正文
+    for (const item of problems.slice(0, MAX_ROWS)) {
       rows.push(
         `<li><span title="${esc(item.name)}">${esc(item.name)}</span><span title="${esc(item.reason)}">${esc(
           item.reason,
@@ -430,10 +464,12 @@ export class ResultCard {
     if (failCount > 0) {
       miniParts.push(cardText.failCount(failCount));
     }
+    // 取消回滚：收缩后那行写「已撤销」，「成功 0」是噪音
+    const miniText = cancelled ? cardText.cancelledMini : miniParts.join(" · ");
 
     const el = document.createElement("div");
     el.className = "sdi-card";
-    if (failCount > 0) {
+    if (failCount > 0 || problemCount > 0) {
       el.classList.add("sdi-card--has-fail");
     }
     el.innerHTML = `
@@ -486,8 +522,8 @@ export class ResultCard {
       </div>
       <div class="sdi-card__mini" hidden>
         <button class="sdi-card__mini-main" type="button" title="${esc(cardText.miniExpand)}">
-          <span class="sdi-card__mini-dot${failCount > 0 ? " is-bad" : ""}"></span>
-          <span class="sdi-card__mini-text">${esc(miniParts.join(" · "))}</span>
+          <span class="sdi-card__mini-dot${failCount > 0 || problemCount > 0 ? " is-bad" : ""}"></span>
+          <span class="sdi-card__mini-text">${esc(miniText)}</span>
           ${canUndo ? `<span class="sdi-card__mini-undo"></span>` : ""}
         </button>
         <button class="sdi-card__mini-close" type="button" aria-label="${esc(text.common.close)}">×</button>
@@ -499,7 +535,8 @@ export class ResultCard {
     this.miniTextEl = el.querySelector<HTMLElement>(".sdi-card__mini-text");
     this.miniUndoEl = el.querySelector<HTMLElement>(".sdi-card__mini-undo");
     this.mode = "full";
-    this.clean = failCount === 0;
+    // 有撤不回来的文档 = 还有事等人处理，卡片不能自己走
+    this.clean = failCount === 0 && problemCount === 0;
     this.undoDeadline = canUndo ? Date.now() + (options.undoWindowMs ?? DEFAULT_UNDO_WINDOW) : 0;
 
     // 只放路径，不放内容：内容在文件里，点按钮直接定位到它

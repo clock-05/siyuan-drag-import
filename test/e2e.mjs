@@ -33,7 +33,7 @@ const stamp = Date.now();
 const { analyzeSources } = await import(`../${BUILD}/source/analyze.mjs?t=${stamp}`);
 const { scanPlan, resolvePlan } = await import(`../${BUILD}/import/planner.mjs?t=${stamp}`);
 const { runPlan } = await import(`../${BUILD}/import/executor.mjs?t=${stamp}`);
-const { undoImport } = await import(`../${BUILD}/import/undo.mjs?t=${stamp}`);
+const { undoImport, rollbackBatch } = await import(`../${BUILD}/import/undo.mjs?t=${stamp}`);
 
 const workDir = mkdtempSync(join(tmpdir(), "sdi-e2e-"));
 global.window = {
@@ -556,11 +556,30 @@ try {
     return gates > 1;
   });
   check("取消后不再建", cancelRun.cancelled === true);
-  check("取消前已建的保留", cancelRun.ok.length === 1, String(cancelRun.ok.length));
+  check("取消前已建的已回滚（executor 只管建，回滚在上层做）", cancelRun.ok.length === 1, String(cancelRun.ok.length));
   const cancelledDoc = await api("/api/filetree/getIDsByHPath", { notebook: nbId, path: "/取消一" });
   const notBuilt = await api("/api/filetree/getIDsByHPath", { notebook: nbId, path: "/取消二" });
-  check("第一篇在库里", (cancelledDoc?.data ?? []).length === 1);
+  check("第一篇在库里（还没回滚）", (cancelledDoc?.data ?? []).length === 1);
   check("第二篇没建", (notBuilt?.data ?? []).length === 0);
+
+  /* ---------- 取消 = 撤销：把取消前建好的那批全撤掉 ---------- */
+  {
+    const rollback = await rollbackBatch({
+      notebook: nbId,
+      targets: cancelRun.ok.map((row) => ({
+        id: row.id,
+        hpath: row.hpath,
+        name: row.name,
+        mode: row.mode,
+        before: row.before,
+      })),
+      autoDirs: [],
+    });
+    check("回滚删掉了取消前建的那篇", rollback.removed === 1, JSON.stringify(rollback));
+    const afterRollback = await api("/api/filetree/getIDsByHPath", { notebook: nbId, path: "/取消一" });
+    check("回滚后文档不在库里了", (afterRollback?.data ?? []).length === 0, JSON.stringify(afterRollback));
+    check("回滚没有失败项", rollback.failed === 0, JSON.stringify(rollback));
+  }
   /* ---------- M4.5：仓库里的附件样例（用户手动验收用的那一份） ---------- */
   const sampleDir = join(process.cwd(), "samples", "附件测试");
   const sampleAnalysis = analyzeSources([fileAt(sampleDir, "", "附件测试")], null);

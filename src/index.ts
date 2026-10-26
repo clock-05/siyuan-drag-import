@@ -3,10 +3,10 @@ import { completeTarget, DropController } from "./drop/controller";
 import type { DropTarget } from "./drop/controller";
 import { lsNotebooks } from "./import/api";
 import { runPlan } from "./import/executor";
-import type { ExecResult } from "./import/executor";
+import type { ExecResult, FailureItem } from "./import/executor";
 import { resolvePlan, scanPlan } from "./import/planner";
 import type { ConflictChoice, PlanItem } from "./import/planner";
-import { undoImport } from "./import/undo";
+import { rollbackBatch, undoImport } from "./import/undo";
 import { detectLanguage, m, setLanguage } from "./i18n";
 import { nodeFs, nodePath, nodeRequire } from "./platform";
 import { AppLogger } from "./logger";
@@ -351,6 +351,14 @@ module.exports = class DragImport extends Plugin {
         return;
       }
 
+      // 「取消」= 撤销：本次导入的内容一点不留。
+      // 用户拖错了、或者发现导到一半不对时，期望的是回到拖进来之前，
+      // 而不是「留下一半让我自己收拾」。所以这里立刻把已建的全撤掉。
+      if (result.cancelled) {
+        await this.rollbackCancelled(plan, result, target.notebook, batch);
+        return;
+      }
+
       this.card.show(
         {
           ok: result.ok,
@@ -358,7 +366,6 @@ module.exports = class DragImport extends Plugin {
           skipped,
           ms: Date.now() - started,
           logPath: this.logger?.filePath ?? "",
-          cancelled: result.cancelled,
           assets: result.assets,
           undoOff: result.snapshotOverflow,
           links: result.links,
@@ -397,7 +404,9 @@ module.exports = class DragImport extends Plugin {
     }
   }
 
-  /** 撤销本批：新建的删掉、覆盖/追加的写回导入前快照（见 import/undo.ts） */
+  /**
+   * 撤销本批：新建的删掉、覆盖/追加的写回导入前快照（见 import/undo.ts）
+   */
   private async undoImport(
     plan: { autoDirs: string[] },
     result: ExecResult,
@@ -421,6 +430,60 @@ module.exports = class DragImport extends Plugin {
     if (parts.length === 0) parts.push(text.undoNothing);
     if (outcome.failed > 0) parts.push(text.undoFailed(outcome.failed));
     return parts.join(" · ");
+  }
+
+  /**
+   * 取消导入 = 把这一批已经写进去的全撤掉。
+   *
+   * 语义上和「撤销」一致（回到拖进来之前）：
+   * - 新建的文档删掉
+   * - 覆盖 / 追加的写回导入前的原文快照
+   *
+   * 撤不回来的（没拿到快照的覆盖、内核拒绝删除）如实报在卡片上，
+   * 免得用户以为「什么都没留下」，实际有几篇正文已经被改了。
+   */
+  private async rollbackCancelled(
+    plan: { autoDirs: string[] },
+    result: ExecResult,
+    notebook: string,
+    batch: LogBatch | null,
+  ): Promise<void> {
+    const targets = result.ok.map((item) => ({
+      id: item.id,
+      hpath: item.hpath,
+      name: item.name,
+      mode: item.mode,
+      before: item.before,
+    }));
+
+    const info = await rollbackBatch({ notebook, targets, autoDirs: plan.autoDirs });
+    batch?.event("undo", "cancel-rollback", { ...info });
+
+    if (this.disposed) {
+      return;
+    }
+
+    // 撤不回来的文档要点名：用户得知道是哪几篇正文还留着被改过的样子
+    const problems: FailureItem[] = [
+      ...info.unrestoredNames.map((name) => ({ name, reason: m().card.cancelledUnrestoredHint })),
+      ...info.failedTargets.map((name) => ({ name, reason: m().card.cancelledRollbackFailedHint })),
+    ];
+
+    this.card.show({
+      ok: [],
+      failed: [],
+      skipped: [],
+      problems,
+      ms: 0,
+      logPath: this.logger?.filePath ?? "",
+      cancelled: true,
+      rolledBack: {
+        removed: info.removed,
+        restored: info.restored,
+        failed: info.failed,
+        unrestored: info.unrestored,
+      },
+    });
   }
 
   /**
@@ -477,6 +540,13 @@ module.exports = class DragImport extends Plugin {
       return;
     }
 
+    // 取消 = 撤销：重试批次也一样，撤掉这次重试已经建好的部分
+    if (result.cancelled) {
+      // 重试时目录都建好了，回滚只删这批新建的文档（autoDirs 传空）
+      await this.rollbackCancelled({ autoDirs: [] }, result, notebook, batch);
+      return;
+    }
+
     this.card.show(
       {
         ok: result.ok,
@@ -484,7 +554,6 @@ module.exports = class DragImport extends Plugin {
         skipped: [],
         ms: Date.now() - started,
         logPath: this.logger?.filePath ?? "",
-        cancelled: result.cancelled,
         assets: result.assets,
         undoOff: result.snapshotOverflow,
         links: result.links,
