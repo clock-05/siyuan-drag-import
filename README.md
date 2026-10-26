@@ -6,19 +6,11 @@
 
 ## Features
 
-- **Files, folders and archives.** Drag any number of `.md` / `.markdown` / `.mdown` / `.mkd` files, whole folders, or `.zip` archives. Sub-folders become nested documents.
-- **Different strategies for name conflicts.** Choose per file or for the whole batch: skip, rename (`Note (2)`), replace (keeps the document id and its child documents), or append (adds the content at the end with a source line).
-- **Undo for a while after importing.** Undo brings you back to the state before the import. Pressing "Cancel and undo" mid-import leaves nothing behind.
-- **Attachments come along.** Images and other local attachments referenced by the Markdown are uploaded to `assets/` (the assets panel) and the links are rewritten.
-- **Obsidian friendly.** `![[image.png]]` becomes an image or file link, and `[[note]]` becomes a SiYuan block reference when the target note is imported in the same batch — click it to jump.
-
-## Install
-
-From the marketplace: **Settings → Marketplace → Plugins → Drag Import → Install**.
-
-Manually: download `package.zip` from the latest release, extract it into `<workspace>/data/plugins/siyuan-drag-import/`, and restart SiYuan.
-
-Windows desktop only — the plugin reads the local file system. Developed and fully tested against 3.8.8.
+- **Files, folders and archives.** Drag any number of `.md` files, a whole folder, or a `.zip`; sub-folders become sub-documents.
+- **You decide what happens to duplicates.** Skip, rename, replace or append — per file, or in one click for the whole batch.
+- **Undo after importing.** Undo puts everything back the way it was; pressing "Cancel and undo" mid-import leaves nothing behind.
+- **Attachments come along.** Images and other local files referenced by the text are uploaded, and the links are rewritten.
+- **Friendly to Obsidian.** `![[image.png]]` becomes an image link, and `[[note]]` from the same batch becomes a SiYuan block reference.
 
 ## Usage
 
@@ -26,20 +18,6 @@ Windows desktop only — the plugin reads the local file system. Developed and f
 2. Drop on a **notebook row** to import at its root, or on a **document** to import as its children. Dropping on the empty space of a notebook section also means "its root".
 3. If names collide, pick a strategy on the conflict card.
 4. The result card lets you open the first document, undo the import, retry failures, or open the log.
-
-## What happens to your Markdown
-
-| Markdown                                                   | Result in SiYuan                        |
-| ---------------------------------------------------------- | --------------------------------------- |
-| YAML frontmatter                                           | Removed                                 |
-| First `# Heading` equal to the document name                | Removed (configurable)                  |
-| UTF-8 / UTF-8 BOM / GBK                                    | Detected automatically; NUL bytes → binary |
-| `$inline$`, `$$block$$`                                    | Left as-is — SiYuan renders them        |
-| `> [!note]` callouts, `- [ ]` tasks, `==highlight==`, `[^1]` footnotes | Left as-is — SiYuan renders them |
-| Local images / attachments                                 | Uploaded, links rewritten; each file uploaded once per batch |
-| `[[note]]`, `[[note\|alias]]`                              | Converted to a block reference when the target is in the same batch |
-| `[[note#heading]]`                                         | Left as-is (a block reference cannot point at a heading) |
-| Code blocks and inline code                                | Never rewritten                         |
 
 ## Settings
 
@@ -56,6 +34,21 @@ Windows desktop only — the plugin reads the local file system. Developed and f
 | Undo window (seconds)       | 30      | 10–300; raise it to check before undoing     |
 | Restore defaults            | —       | Resets and saves all of the above            |
 
+## Markdown compatibility
+
+Four things get changed; everything else is handed to SiYuan untouched.
+
+| Changed                                                    | What happens                                                      |
+| ---------------------------------------------------------- | ----------------------------------------------------------------- |
+| YAML frontmatter at the top                                | Removed — SiYuan doesn't parse it, so it would show up as two horizontal rules |
+| First `# Heading` equal to the document name                | Removed, so the title isn't shown twice (can be turned off in settings) |
+| Images / attachments pointing at local files                | Uploaded to `assets/` with the links rewritten; each file uploaded once per batch |
+| `[[note]]`, `[[note\|alias]]` within the same batch         | Turned into SiYuan block references                                |
+
+`$math$`, `> [!note]` callouts, `- [ ]` tasks, `==highlight==`, `[^1]` footnotes, tables and code blocks are left alone, and links inside code are never touched.
+
+Two cases stay as text: `[[note#heading]]` (a block reference can't point at a heading) and `[[note]]` whose target isn't in the same drop. Files are read as UTF-8, UTF-8 BOM or GBK; binary files are rejected.
+
 ## Limits
 
 - Windows desktop only; archives other than `.zip` (`.rar`, `.7z`, …) must be converted first.
@@ -65,6 +58,7 @@ Windows desktop only — the plugin reads the local file system. Developed and f
 - Undo snapshots live in memory only.
 - Wiki links are resolved only inside the batch being imported.
 - Append mode keeps the document's existing blocks, so `[[links]]` inside an appended section are left as text.
+- Developed and fully tested against SiYuan 3.8.8.
 
 ## Troubleshooting
 
