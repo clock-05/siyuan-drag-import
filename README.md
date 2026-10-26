@@ -6,9 +6,9 @@
 
 ## Features
 
-- **Files, folders and archives.** Drag any number of `.md` files, a whole folder, or a `.zip`; sub-folders become sub-documents.
-- **You decide what happens to duplicates.** Skip, rename, replace or append — per file, or in one click for the whole batch.
-- **Undo after importing.** Undo puts everything back the way it was; pressing "Cancel and undo" mid-import leaves nothing behind.
+- **Files, folders and archives.** Drag several `.md` files at once, a whole folder, or a `.zip`; sub-folders become sub-documents.
+- **Duplicate names are up to you.** Skip, rename, replace or append — per file, or in one click for the whole batch.
+- **Undo after importing**, back to how things were before.
 - **Attachments come along.** Images and other local files referenced by the text are uploaded, and the links are rewritten.
 - **Friendly to Obsidian.** `![[image.png]]` becomes an image link, and `[[note]]` from the same batch becomes a SiYuan block reference.
 
@@ -44,10 +44,6 @@ Four things get changed; everything else is handed to SiYuan untouched.
 | First `# Heading` equal to the document name                | Removed, so the title isn't shown twice (can be turned off in settings) |
 | Images / attachments pointing at local files                | Uploaded to `assets/` with the links rewritten; each file uploaded once per batch |
 | `[[note]]`, `[[note\|alias]]` within the same batch         | Turned into SiYuan block references                                |
-
-`$math$`, `> [!note]` callouts, `- [ ]` tasks, `==highlight==`, `[^1]` footnotes, tables and code blocks are left alone, and links inside code are never touched.
-
-Two cases stay as text: `[[note#heading]]` (a block reference can't point at a heading) and `[[note]]` whose target isn't in the same drop. Files are read as UTF-8, UTF-8 BOM or GBK; binary files are rejected.
 
 ## Limits
 
