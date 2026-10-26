@@ -131,10 +131,9 @@ export const zh = {
 
   /** 设置面板 */
   settings: {
-    uploadImages: "上传本地图片与附件",
-    uploadImagesDesc: "把正文里引用的本地图片、PDF 等文件传到 assets 并改写链接；关掉则保留原始相对路径",
-    stripFrontmatter: "剥离 frontmatter",
-    stripFrontmatterDesc: "去掉正文开头的 YAML 块（思源不解析它，留着会变成两条分隔线）",
+    uploadImages: "上传附件",
+    uploadImagesDesc:
+      "把正文里引用的本地图片、PDF 等文件传到 assets 并改写链接；关掉则保留原始相对路径（图片会显示不出来）",
     removeH1: "移除重复的首行 H1",
     wikilinks: "转换 Obsidian 双链",
     removeH1Desc: "首行标题与文档名相同时删掉它，避免树上一个标题、正文又一个",

@@ -333,7 +333,6 @@ module.exports = class DragImport extends Plugin {
         () => stopRequested.value || this.disposed,
         {
           uploadImages: this.settings.uploadImages,
-          stripFrontmatter: this.settings.stripFrontmatter,
           removeDuplicateH1: this.settings.removeDuplicateH1,
           convertWikilinks: this.settings.convertWikilinks,
           maxBytes: this.settings.maxFileMB * 1024 * 1024,
@@ -525,7 +524,6 @@ module.exports = class DragImport extends Plugin {
       () => stopRequested.value || this.disposed,
       {
         uploadImages: this.settings.uploadImages,
-        stripFrontmatter: this.settings.stripFrontmatter,
         removeDuplicateH1: this.settings.removeDuplicateH1,
         convertWikilinks: this.settings.convertWikilinks,
         maxBytes: this.settings.maxFileMB * 1024 * 1024,

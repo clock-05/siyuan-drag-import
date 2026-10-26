@@ -4,7 +4,6 @@ import type { ConflictChoice } from "./import/planner";
 
 export interface Settings {
   uploadImages: boolean;
-  stripFrontmatter: boolean;
   removeDuplicateH1: boolean;
   /** 把 `[[笔记]]` 换成思源块引用（只对本批内能唯一命中的目标生效） */
   convertWikilinks: boolean;
@@ -18,7 +17,6 @@ export const SETTINGS_KEY = "settings";
 
 export const DEFAULT_SETTINGS: Settings = {
   uploadImages: true,
-  stripFrontmatter: true,
   removeDuplicateH1: true,
   convertWikilinks: true,
   maxFileMB: 20,
@@ -52,8 +50,14 @@ function clamp(value: number, min: number, max: number): number {
 
 /** 老版本/手改配置兜底，别让一个坏值把导入搞崩 */
 export function normalizeSettings(raw: unknown): Settings {
-  const input = (raw ?? {}) as Partial<Settings> & { undoWindowMinutes?: number };
+  const input = (raw ?? {}) as Partial<Settings> & {
+    undoWindowMinutes?: number;
+    /** 1.0.2 及更早的「剥离 frontmatter」开关，现在恒开，忽略即可 */
+    stripFrontmatter?: boolean;
+  };
   const merged: Settings = { ...DEFAULT_SETTINGS, ...input };
+  // 已移除的旧键，别让它跟着 settings 一起被存回去
+  delete (merged as any).stripFrontmatter;
   if (!CONFLICT_VALUES.includes(merged.conflictDefault)) {
     merged.conflictDefault = DEFAULT_SETTINGS.conflictDefault;
   }
@@ -69,7 +73,6 @@ export function normalizeSettings(raw: unknown): Settings {
   merged.undoWindowSeconds = clamp(Number(merged.undoWindowSeconds), 10, 300);
 
   merged.uploadImages = merged.uploadImages !== false;
-  merged.stripFrontmatter = merged.stripFrontmatter !== false;
   merged.removeDuplicateH1 = merged.removeDuplicateH1 !== false;
   merged.convertWikilinks = merged.convertWikilinks !== false;
   return merged;
@@ -136,19 +139,6 @@ export function createSettingPanel(settings: Settings, onChange: () => void): Se
         () => settings.uploadImages,
         (value) => {
           settings.uploadImages = value;
-        },
-        track,
-      ),
-  });
-
-  panel.addItem({
-    title: text.stripFrontmatter,
-    description: text.stripFrontmatterDesc,
-    createActionElement: () =>
-      checkbox(
-        () => settings.stripFrontmatter,
-        (value) => {
-          settings.stripFrontmatter = value;
         },
         track,
       ),

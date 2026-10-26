@@ -819,3 +819,14 @@ logger.ts           JSONL 落盘 + 清理
 - 顺带：executor 在取消时**跳过双链回填**（`patchWikilinks`）——那批文档马上要删，
   没必要再改一遍正文。
 - 卡片相应调整：取消后小条上写「已撤销」而不是「成功 0」；有撤不回来的问题时红点常驻。
+
+**v1.15（2026-10-26，1.0.3：设置项瘦身）**：
+
+- 砍掉「剥离 frontmatter」开关。关掉它只会得到「两条 `---` 夹一段 YAML 原文」——
+  这不是另一种选择，是坏掉的样子，因此恒剥，不做成设置（`parseMarkdown` 不再收这个参数）。
+- 「上传本地图片与附件」改名「**上传附件**」：图片本来就是附件的一种，原名把子集并列了一遍。
+  描述里补上关掉的真实后果（图片会显示不出来），别让人以为是「省点空间」。
+- 老配置里的 `stripFrontmatter` 键在 `normalizeSettings()` 里显式 delete，不再被存回去。
+- **设置入口只留一处做不到**：思源顶栏「插件」菜单的条目和集市「已下载」的齿轮，判定是同一个
+  `hasPluginSetting(plugin)`（`Boolean(plugin.setting) || plugin.openSetting !== Plugin.prototype.openSetting`，
+  见 `app/src/plugin/index.ts`）。要么两处都有，要么两处都没有，没有单开关。保持现状。

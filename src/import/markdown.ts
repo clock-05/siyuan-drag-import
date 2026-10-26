@@ -108,7 +108,6 @@ export function stripDuplicateH1(text: string, docName: string): { text: string;
 }
 
 export interface ParseOptions {
-  stripFrontmatter?: boolean;
   removeDuplicateH1?: boolean;
 }
 
@@ -118,10 +117,9 @@ export function parseMarkdown(
   options: ParseOptions = {},
 ): ParsedDoc {
   const decoded = decodeBytes(input);
-  const frontmatter =
-    options.stripFrontmatter === false
-      ? { text: decoded.text, removed: false }
-      : stripFrontmatter(decoded.text);
+  // frontmatter 永远剥：思源不解析 YAML，留着就是正文顶上挂两条分隔线加一段原文，
+  // 没有第二种合理结果，所以不做成设置项。
+  const frontmatter = stripFrontmatter(decoded.text);
   const h1 =
     options.removeDuplicateH1 === false
       ? { text: frontmatter.text, removed: false }

@@ -133,7 +133,7 @@ check("settings 步骤成功", logText.includes("settings: ok"), logText.slice(-
 /* ---------- 设置入口：只留思源插件菜单那一条，不再挂顶栏齿轮 ---------- */
 check("不再注册顶栏图标", topBarCalls === 0, `addTopBar 调用了 ${topBarCalls} 次`);
 check("设置面板挂在基类 setting 字段上", Boolean(plugin.setting));
-check("设置项共 8 条（含恢复默认）", plugin.setting?.items.length === 8, String(plugin.setting?.items.length));
+check("设置项共 7 条（含恢复默认）", plugin.setting?.items.length === 7, String(plugin.setting?.items.length));
 check("openSetting 能打开面板", plugin.openSetting() === true);
 check(
   "面板标题用 displayName",

@@ -31,7 +31,7 @@ Windows desktop only — the plugin reads the local file system. Developed and f
 
 | Markdown                                                   | Result in SiYuan                        |
 | ---------------------------------------------------------- | --------------------------------------- |
-| YAML frontmatter                                           | Removed (can be kept in settings)       |
+| YAML frontmatter                                           | Removed                                 |
 | First `# Heading` equal to the document name                | Removed (configurable)                  |
 | UTF-8 / UTF-8 BOM / GBK                                    | Detected automatically; NUL bytes → binary |
 | `$inline$`, `$$block$$`                                    | Left as-is — SiYuan renders them        |
@@ -47,8 +47,7 @@ Windows desktop only — the plugin reads the local file system. Developed and f
 
 | Setting                     | Default | Meaning                                     |
 | --------------------------- | ------- | ------------------------------------------- |
-| Upload local images and attachments | On | Off keeps the original relative paths        |
-| Strip frontmatter           | On      | Remove the leading YAML block                |
+| Upload attachments          | On      | Off keeps the original paths (images break)  |
 | Remove duplicate first H1    | On      | Drop the heading when it repeats the name    |
 | Convert Obsidian wiki links | On      | `[[note]]` → block reference within the batch |
 | Default handling for duplicates | Rename | Pre-selected on the conflict card        |

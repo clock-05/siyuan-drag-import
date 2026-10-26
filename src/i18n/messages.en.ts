@@ -119,12 +119,9 @@ export const en: typeof zh = {
   },
 
   settings: {
-    uploadImages: "Upload local images and attachments",
+    uploadImages: "Upload attachments",
     uploadImagesDesc:
-      "Upload referenced images, PDFs and other local files to assets and rewrite the links. Turn off to keep the original relative paths.",
-    stripFrontmatter: "Strip frontmatter",
-    stripFrontmatterDesc:
-      "Remove the YAML block at the top — SiYuan doesn't parse it, so it would show up as two horizontal rules.",
+      "Copy referenced images, PDFs and other local files into assets and rewrite the links. Turn off to keep the original relative paths (images will then fail to load).",
     removeH1: "Remove duplicate first H1",
     removeH1Desc: "Drop the first heading when it matches the document name, so the title isn't shown twice.",
     wikilinks: "Convert Obsidian wiki links",
