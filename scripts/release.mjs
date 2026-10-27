@@ -96,10 +96,14 @@ if (dryRun) {
   process.exit(0);
 }
 
-// 3. 提交
-run("git", ["add", "-A"]);
-run("git", ["commit", "-m", `release: ${version}`]);
-say(`已提交 release: ${version}`);
+// 3. 提交（改动可能已经手动提交过，工作区干净时跳过，否则 commit 会因“无内容”失败）
+if (run("git", ["status", "--porcelain"])) {
+  run("git", ["add", "-A"]);
+  run("git", ["commit", "-m", `release: ${version}`]);
+  say(`已提交 release: ${version}`);
+} else {
+  say("工作区已干净，跳过提交");
+}
 
 // 4. 打 tag（同名 tag 存在就先删本地）
 try {
