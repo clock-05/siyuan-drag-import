@@ -50,6 +50,8 @@ export interface RunOptions {
   /** 默认 true；关掉就保留原链接 */
   uploadImages?: boolean;
   maxBytes?: number;
+  /** 默认 true；关掉就保留开头的 YAML 块 */
+  stripFrontmatter?: boolean;
   removeDuplicateH1?: boolean;
   /** 默认 true：把 `[[笔记]]` 转成思源块引用（只对本批内能唯一命中的目标生效） */
   convertWikilinks?: boolean;
@@ -160,6 +162,7 @@ export async function runPlan(
       }
 
       const parsed = parseMarkdown(bytes, item.name, {
+        stripFrontmatter: options.stripFrontmatter,
         removeDuplicateH1: options.removeDuplicateH1,
       });
 

@@ -108,6 +108,8 @@ export function stripDuplicateH1(text: string, docName: string): { text: string;
 }
 
 export interface ParseOptions {
+  /** 默认 true；关掉就原样保留开头的 YAML 块 */
+  stripFrontmatter?: boolean;
   removeDuplicateH1?: boolean;
 }
 
@@ -117,9 +119,12 @@ export function parseMarkdown(
   options: ParseOptions = {},
 ): ParsedDoc {
   const decoded = decodeBytes(input);
-  // frontmatter 永远剥：思源不解析 YAML，留着就是正文顶上挂两条分隔线加一段原文，
-  // 没有第二种合理结果，所以不做成设置项。
-  const frontmatter = stripFrontmatter(decoded.text);
+  // 默认剥掉：思源不解析 YAML，留着就是正文顶上挂两条分隔线加一段原文。
+  // 但保留也算一种选择（把思源当编辑器、导出回静态站点的人要这个），所以做成开关。
+  const frontmatter =
+    options.stripFrontmatter === false
+      ? { text: decoded.text, removed: false }
+      : stripFrontmatter(decoded.text);
   const h1 =
     options.removeDuplicateH1 === false
       ? { text: frontmatter.text, removed: false }

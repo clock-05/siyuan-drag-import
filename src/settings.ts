@@ -9,6 +9,8 @@ export interface Settings {
    * 默认 false：文件夹也是一层父文档（拖 A 得到 A/…，与思源原生导入一致）。
    */
   skipRootFolder: boolean;
+  /** 剥掉开头那段 YAML（默认剥；关掉则原样保留） */
+  stripFrontmatter: boolean;
   removeDuplicateH1: boolean;
   /** 把 `[[笔记]]` 换成思源块引用（只对本批内能唯一命中的目标生效） */
   convertWikilinks: boolean;
@@ -23,6 +25,7 @@ export const SETTINGS_KEY = "settings";
 export const DEFAULT_SETTINGS: Settings = {
   uploadImages: true,
   skipRootFolder: false,
+  stripFrontmatter: true,
   removeDuplicateH1: true,
   convertWikilinks: true,
   maxFileMB: 20,
@@ -58,12 +61,8 @@ function clamp(value: number, min: number, max: number): number {
 export function normalizeSettings(raw: unknown): Settings {
   const input = (raw ?? {}) as Partial<Settings> & {
     undoWindowMinutes?: number;
-    /** 1.0.2 及更早的「剥离 frontmatter」开关，现在恒开，忽略即可 */
-    stripFrontmatter?: boolean;
   };
   const merged: Settings = { ...DEFAULT_SETTINGS, ...input };
-  // 已移除的旧键，别让它跟着 settings 一起被存回去
-  delete (merged as any).stripFrontmatter;
   if (!CONFLICT_VALUES.includes(merged.conflictDefault)) {
     merged.conflictDefault = DEFAULT_SETTINGS.conflictDefault;
   }
@@ -80,6 +79,7 @@ export function normalizeSettings(raw: unknown): Settings {
 
   merged.uploadImages = merged.uploadImages !== false;
   merged.skipRootFolder = merged.skipRootFolder === true;
+  merged.stripFrontmatter = merged.stripFrontmatter !== false;
   merged.removeDuplicateH1 = merged.removeDuplicateH1 !== false;
   merged.convertWikilinks = merged.convertWikilinks !== false;
   return merged;
@@ -159,6 +159,19 @@ export function createSettingPanel(settings: Settings, onChange: () => void): Se
         () => settings.skipRootFolder,
         (value) => {
           settings.skipRootFolder = value;
+        },
+        track,
+      ),
+  });
+
+  panel.addItem({
+    title: text.stripFrontmatter,
+    description: text.stripFrontmatterDesc,
+    createActionElement: () =>
+      checkbox(
+        () => settings.stripFrontmatter,
+        (value) => {
+          settings.stripFrontmatter = value;
         },
         track,
       ),

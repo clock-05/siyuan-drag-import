@@ -131,6 +131,23 @@ try {
   const first = await runPlan(plan.items, nbId, null);
   check("2 篇全部建成", first.ok.length === 2 && first.failed.length === 0, JSON.stringify(first.failed));
 
+  // 关掉「剥离 frontmatter」时，YAML 块要原样留在正文里
+  const keepRun = await runPlan(
+    [{ ...plan.items[0], hpath: "/保留frontmatter" }],
+    nbId,
+    null,
+    undefined,
+    undefined,
+    { stripFrontmatter: false },
+  );
+  check("保留 frontmatter：建成", keepRun.ok.length === 1, JSON.stringify(keepRun.failed));
+  const keptDoc = await api("/api/block/getBlockKramdown", { id: keepRun.ok[0]?.id });
+  check(
+    "保留 frontmatter：YAML 还在正文里",
+    (keptDoc?.data?.kramdown ?? "").includes("tags:"),
+    keptDoc?.data?.kramdown ?? "",
+  );
+
   /* ---------- 失败项要带「能不能重试」的标记 ---------- */
   const hugeRun = await runPlan(
     plan.items.slice(0, 1).map((item) => ({ ...item, size: 999 * 1024 * 1024 })),

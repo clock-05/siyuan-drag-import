@@ -125,6 +125,9 @@ export const en: typeof zh = {
     skipRootFolder: "Don't create a document for the folder",
     skipRootFolderDesc:
       "Put a dropped folder's contents straight into the drop target instead of creating an empty document for the folder itself. Sub-folders still become documents; zip archives are unaffected.",
+    stripFrontmatter: "Strip frontmatter",
+    stripFrontmatterDesc:
+      "Remove the YAML block at the top — SiYuan doesn't parse it, so it would show up as two horizontal rules. Turn off to keep it as-is.",
     removeH1: "Remove duplicate first H1",
     removeH1Desc: "Drop the first heading when it matches the document name, so the title isn't shown twice.",
     wikilinks: "Convert Obsidian wiki links",

@@ -1,6 +1,6 @@
 {
   "name": "siyuan-drag-import",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": true,
   "description": "SiYuan plugin: drag Markdown files onto the document tree to import them",
   "scripts": {

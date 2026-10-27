@@ -27,6 +27,7 @@
 | --------------------------- | ------- | ------------------------------------------- |
 | Upload attachments          | On      | Off keeps the original paths (images break)  |
 | No document for the folder  | Off     | Drop a folder and its contents land directly in the target; the folder itself doesn't become a document |
+| Strip frontmatter           | On      | Removes the leading YAML block; off keeps it as-is |
 | Remove duplicate first H1    | On      | Drop the heading when it repeats the name    |
 | Convert Obsidian wiki links | On      | `[[note]]` → block reference within the batch |
 | Default handling for duplicates | Rename | Pre-selected on the conflict card        |
@@ -40,7 +41,7 @@ Four things get changed; everything else is handed to SiYuan untouched.
 
 | Changed                                                    | What happens                                                      |
 | ---------------------------------------------------------- | ----------------------------------------------------------------- |
-| YAML frontmatter at the top                                | Removed — SiYuan doesn't parse it, so it would show up as two horizontal rules |
+| YAML frontmatter at the top                                | Removed — SiYuan doesn't parse it, so it would show up as two horizontal rules (can be turned off in settings) |
 | First `# Heading` equal to the document name                | Removed, so the title isn't shown twice (can be turned off in settings) |
 | Images / attachments pointing at local files                | Uploaded to `assets/` with the links rewritten; each file uploaded once per batch |
 | `[[note]]`, `[[note\|alias]]` within the same batch         | Turned into SiYuan block references                                |
