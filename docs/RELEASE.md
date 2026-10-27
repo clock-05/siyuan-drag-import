@@ -103,7 +103,7 @@ git push origin main && git push origin v1.0.2
 - [ ] `icon.png` 160×160、≤64 KiB
 - [ ] `preview.png` 1024×768、≤512 KiB（有的话 `plugin.json` 必须声明 `preview`）
 - [ ] Release 里 `package.zip` 可下载，解压后根目录直接是 `index.js` / `plugin.json`（不能多套一层）
-- [ ] `minAppVersion` 不高于你实际测试过的版本（当前 3.1.0，实际完整测试在 3.8.8）
+- [ ] `minAppVersion` 不高于你实际测试过的版本（当前 3.8.0，实际完整测试在 3.8.8）
 - [ ] README 里没有失效链接（`LICENSE`、`docs/*` 都已随仓库提交）
 - [ ] 界面文案改动同步改了 `messages.zh.ts` 和 `messages.en.ts`
 

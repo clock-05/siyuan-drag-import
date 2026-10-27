@@ -55,7 +55,7 @@ Four things get changed; everything else is handed to SiYuan untouched.
 - Undo snapshots live in memory only.
 - Wiki links are resolved only inside the batch being imported.
 - Append mode keeps the document's existing blocks, so `[[links]]` inside an appended section are left as text.
-- Developed and fully tested against SiYuan 3.8.8.
+- Requires SiYuan 3.8.0 or newer; developed and fully tested against 3.8.8.
 
 ## Troubleshooting
 
