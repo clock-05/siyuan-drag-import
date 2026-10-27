@@ -158,13 +158,17 @@ check("迁移后不残留旧键", "undoWindowMinutes" in norm({ undoWindowMinute
 check("冲突默认值非法时回退", norm({ conflictDefault: "乱写" }).conflictDefault, "suffix");
 check("stripFrontmatter 默认开", norm({}).stripFrontmatter, true);
 check("stripFrontmatter 关掉后保持关", norm({ stripFrontmatter: false }).stripFrontmatter, false);
-check("keepFolderStructure 默认开（文件夹本身成篇）", norm({}).keepFolderStructure, true);
-check("keepFolderStructure 关掉后保持关", norm({ keepFolderStructure: false }).keepFolderStructure, false);
-// 1.0.3 的键方向相反：存 true 是「不建外壳文档」→ 迁移后应为「不保留结构」
-check("旧键 skipRootFolder:true 迁移成不保留", norm({ skipRootFolder: true }).keepFolderStructure, false);
-check("旧键 skipRootFolder:false 迁移成保留", norm({ skipRootFolder: false }).keepFolderStructure, true);
-check("迁移后不残留旧键", "skipRootFolder" in norm({ skipRootFolder: true }), false);
-check("新键优先，旧键忽略", norm({ skipRootFolder: true, keepFolderStructure: true }).keepFolderStructure, true);
+check("keepTopFolder 默认开（文件夹本身成篇）", norm({}).keepTopFolder, true);
+check("keepTopFolder 关掉后保持关", norm({ keepTopFolder: false }).keepTopFolder, false);
+// 1.0.3 的键方向相反：存 true 是「不建外壳文档」→ 迁移后应为「不保留顶层文件夹」
+check("旧键 skipRootFolder:true 迁移成不保留", norm({ skipRootFolder: true }).keepTopFolder, false);
+check("旧键 skipRootFolder:false 迁移成保留", norm({ skipRootFolder: false }).keepTopFolder, true);
+check("迁移后不残留 skipRootFolder", "skipRootFolder" in norm({ skipRootFolder: true }), false);
+check("新键优先，旧键忽略", norm({ skipRootFolder: true, keepTopFolder: true }).keepTopFolder, true);
+// 只是改名的那个键同向迁移，不能取反
+check("keepFolderStructure:false 迁移成不保留", norm({ keepFolderStructure: false }).keepTopFolder, false);
+check("keepFolderStructure:true 迁移成保留", norm({ keepFolderStructure: true }).keepTopFolder, true);
+check("迁移后不残留 keepFolderStructure", "keepFolderStructure" in norm({ keepFolderStructure: true }), false);
 
 /* ---------- 设置面板：恢复默认 ---------- */
 // 桩 Setting 不会自己建控件，这里手动把每个 item 的元素建出来并挂进 DOM
@@ -193,7 +197,7 @@ check("恢复默认：大小上限回到 20", live.maxFileMB, 20);
 check("恢复默认：撤销窗口回到 30 秒", live.undoWindowSeconds, 30);
 check("恢复默认：冲突策略回到加后缀", live.conflictDefault, "suffix");
 check("恢复默认：开关回到开", live.uploadImages, true);
-check("恢复默认：文件夹结构回到保留", live.keepFolderStructure, true);
+check("恢复默认：顶层文件夹回到保留", live.keepTopFolder, true);
 check("恢复默认会保存一次", saves, 1);
 // 控件本身也要跟着变，不然用户看到的是旧值
 check("输入框同步成 20", nodes[2].value, "20");

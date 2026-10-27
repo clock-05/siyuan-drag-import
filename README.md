@@ -28,7 +28,7 @@
 | Default handling for duplicates | Rename | Pre-selected on the conflict card        |
 | Undo window (seconds)       | 30      | 10–300; raise it to check before undoing     |
 | Max size per file (MB)      | 20      | Larger files are skipped and listed          |
-| Keep the folder structure    | On      | A dropped folder becomes a document of its own; off puts its contents straight into the drop target |
+| Keep the top-level folder    | On      | The dropped folder becomes a document; sub-folders keep their nesting either way. Off puts the contents straight into the drop target |
 | Strip frontmatter           | On      | Removes the leading YAML block; off keeps it as-is |
 | Remove duplicate first H1    | On      | Drop the heading when it repeats the name    |
 | Upload attachments          | On      | Off keeps the original paths (images break)  |

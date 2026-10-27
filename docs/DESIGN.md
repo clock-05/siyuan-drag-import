@@ -891,3 +891,13 @@ logger.ts           JSONL 落盘 + 清理
   迁移完 `delete` 旧键。传给 `analyzeSources()` 时再取反一次（内核语义仍是 `skipRootFolder`）。
 - 教训：**开关名一旦是「不做什么」，用户就得在脑子里做一次取反**。命名尽量用正向表述
   （保留 / 上传 / 移除），只有“移除重复首行 H1”这类动作本身没法正向说才保留动词。
+
+**v1.21（2026-10-27，「保留顶层文件夹」定名）**：
+
+- 「保留文件夹结构」这个名字**说得太宽**：它实际只决定「被拖的那一个文件夹本身要不要成篇」，
+  里面的子文件夹在任何情况下都保留层级（那是 `dirs` 里本来就带的前缀，与开关无关）。
+- 改名 **「保留顶层文件夹 / Keep the top-level folder」**，说明也一并改成：
+  「为被拖的那个文件夹本身建一篇文档；里面的子文件夹总是保留层级，关掉则内容直接落到拖放位置。」
+- 键名同步 `keepFolderStructure` → **`keepTopFolder`**（同向迁移）。配置里可能同时存在三个键：
+  `skipRootFolder`（1.0.3，**方向相反**，取反）、`keepFolderStructure`（同向，改名）、`keepTopFolder`（当前）。
+  迁移顺序：当前键 > keepFolderStructure > skipRootFolder，迁完 `delete` 前两个。

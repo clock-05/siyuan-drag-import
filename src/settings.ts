@@ -5,11 +5,12 @@ import type { ConflictChoice } from "./import/planner";
 export interface Settings {
   uploadImages: boolean;
   /**
-   * 拖入文件夹时保留外层那一级：文件夹本身也建成一篇文档（拖 A 得到 A/…，与思源原生导入一致）。
+   * 拖入文件夹时为「被拖的那个文件夹本身」建一篇文档（拖 A 得到 A/…，与思源原生导入一致）。
    * 默认 true。关掉就把里面的内容直接放到拖放位置。
-   * 注意方向：这里存的是「保留结构」，内核那边要的是「跳过根」（`skipRootFolder`），传参时取反。
+   * 只影响**顶层**那一级：里面的子文件夹在任何情况下都保留层级。
+   * 注意方向：这里存的是「保留」，内核那边要的是「跳过根」（`skipRootFolder`），传参时取反。
    */
-  keepFolderStructure: boolean;
+  keepTopFolder: boolean;
   /** 剥掉开头那段 YAML（默认剥；关掉则原样保留） */
   stripFrontmatter: boolean;
   removeDuplicateH1: boolean;
@@ -25,7 +26,7 @@ export const SETTINGS_KEY = "settings";
 
 export const DEFAULT_SETTINGS: Settings = {
   uploadImages: true,
-  keepFolderStructure: true,
+  keepTopFolder: true,
   stripFrontmatter: true,
   removeDuplicateH1: true,
   convertWikilinks: true,
@@ -62,8 +63,10 @@ function clamp(value: number, min: number, max: number): number {
 export function normalizeSettings(raw: unknown): Settings {
   const input = (raw ?? {}) as Partial<Settings> & {
     undoWindowMinutes?: number;
-    /** 1.0.3 及更早的键，方向与 keepFolderStructure 相反（true = 不建外壳文档） */
+    /** 1.0.3 及更早的键，方向与 keepTopFolder 相反（true = 不建外壳文档） */
     skipRootFolder?: boolean;
+    /** 开发期用过的键，方向与 keepTopFolder 相同，只是名字里“结构”说得太宽 */
+    keepFolderStructure?: boolean;
   };
   const merged: Settings = { ...DEFAULT_SETTINGS, ...input };
   if (!CONFLICT_VALUES.includes(merged.conflictDefault)) {
@@ -80,15 +83,20 @@ export function normalizeSettings(raw: unknown): Settings {
   delete (merged as any).undoWindowMinutes;
   merged.undoWindowSeconds = clamp(Number(merged.undoWindowSeconds), 10, 300);
 
-  // 1.0.3 存的键叫 skipRootFolder，方向相反（true = 不建外壳文档）。
-  // 名字换了、方向也换了 → 旧值必须取反迁移，否则老用户的结构会静默翻转。
-  if (!("keepFolderStructure" in input) && typeof input.skipRootFolder === "boolean") {
-    merged.keepFolderStructure = !input.skipRootFolder;
+  // 两个旧键：skipRootFolder（1.0.3，方向相反，必须取反）、keepFolderStructure（同向，只是改名）。
+  // 都不迁移的话，老用户的结构会静默翻转或丢掉自己改过的值。
+  if (!("keepTopFolder" in input)) {
+    if (typeof input.keepFolderStructure === "boolean") {
+      merged.keepTopFolder = input.keepFolderStructure;
+    } else if (typeof input.skipRootFolder === "boolean") {
+      merged.keepTopFolder = !input.skipRootFolder;
+    }
   }
   delete (merged as any).skipRootFolder;
+  delete (merged as any).keepFolderStructure;
 
   merged.uploadImages = merged.uploadImages !== false;
-  merged.keepFolderStructure = merged.keepFolderStructure !== false;
+  merged.keepTopFolder = merged.keepTopFolder !== false;
   merged.stripFrontmatter = merged.stripFrontmatter !== false;
   merged.removeDuplicateH1 = merged.removeDuplicateH1 !== false;
   merged.convertWikilinks = merged.convertWikilinks !== false;
@@ -202,13 +210,13 @@ export function createSettingPanel(settings: Settings, onChange: () => void): Se
   });
 
   panel.addItem({
-    title: text.keepFolderStructure,
-    description: text.keepFolderStructureDesc,
+    title: text.keepTopFolder,
+    description: text.keepTopFolderDesc,
     createActionElement: () =>
       checkbox(
-        () => settings.keepFolderStructure,
+        () => settings.keepTopFolder,
         (value) => {
-          settings.keepFolderStructure = value;
+          settings.keepTopFolder = value;
         },
         track,
       ),

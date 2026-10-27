@@ -134,9 +134,9 @@ export const zh = {
     uploadImages: "上传附件",
     uploadImagesDesc:
       "把正文里引用的本地图片、PDF 等文件传到 assets 并改写链接；关掉则保留原始相对路径（图片会显示不出来）",
-    keepFolderStructure: "保留文件夹结构",
-    keepFolderStructureDesc:
-      "拖入文件夹时，外层文件夹本身也建成一篇文档，里面的层级原样保留；关掉则把内容直接放到拖放位置。zip 不受影响。",
+    keepTopFolder: "保留顶层文件夹",
+    keepTopFolderDesc:
+      "拖入文件夹时，为被拖的那一个文件夹本身也建一篇文档；它里面的子文件夹无论开关如何都保留层级。关掉则内容直接放到拖放位置。",
     stripFrontmatter: "剥离 frontmatter",
     stripFrontmatterDesc:
       "去掉正文开头的 YAML 块（思源不解析它，留着会变成两条分隔线）；关掉则原样保留",
