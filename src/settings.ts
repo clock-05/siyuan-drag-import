@@ -139,6 +139,29 @@ export function createSettingPanel(settings: Settings, onChange: () => void): Se
   };
 
   panel.addItem({
+    title: text.conflictDefault,
+    description: text.conflictDefaultDesc,
+    createActionElement: () => {
+      const select = document.createElement("select");
+      select.className = "b3-select fn__flex-center fn__size200";
+      for (const value of CONFLICT_VALUES) {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = conflictLabel(value);
+        option.selected = value === settings.conflictDefault;
+        select.append(option);
+      }
+      track(() => {
+        select.value = settings.conflictDefault;
+      });
+      select.addEventListener("change", () => {
+        settings.conflictDefault = select.value as ConflictChoice;
+      });
+      return select;
+    },
+  });
+
+  panel.addItem({
     title: text.uploadImages,
     description: text.uploadImagesDesc,
     createActionElement: () =>
@@ -146,19 +169,6 @@ export function createSettingPanel(settings: Settings, onChange: () => void): Se
         () => settings.uploadImages,
         (value) => {
           settings.uploadImages = value;
-        },
-        track,
-      ),
-  });
-
-  panel.addItem({
-    title: text.skipRootFolder,
-    description: text.skipRootFolderDesc,
-    createActionElement: () =>
-      checkbox(
-        () => settings.skipRootFolder,
-        (value) => {
-          settings.skipRootFolder = value;
         },
         track,
       ),
@@ -204,26 +214,16 @@ export function createSettingPanel(settings: Settings, onChange: () => void): Se
   });
 
   panel.addItem({
-    title: text.conflictDefault,
-    description: text.conflictDefaultDesc,
-    createActionElement: () => {
-      const select = document.createElement("select");
-      select.className = "b3-select fn__flex-center fn__size200";
-      for (const value of CONFLICT_VALUES) {
-        const option = document.createElement("option");
-        option.value = value;
-        option.textContent = conflictLabel(value);
-        option.selected = value === settings.conflictDefault;
-        select.append(option);
-      }
-      track(() => {
-        select.value = settings.conflictDefault;
-      });
-      select.addEventListener("change", () => {
-        settings.conflictDefault = select.value as ConflictChoice;
-      });
-      return select;
-    },
+    title: text.skipRootFolder,
+    description: text.skipRootFolderDesc,
+    createActionElement: () =>
+      checkbox(
+        () => settings.skipRootFolder,
+        (value) => {
+          settings.skipRootFolder = value;
+        },
+        track,
+      ),
   });
 
   panel.addItem({

@@ -192,8 +192,8 @@ check("恢复默认：开关回到开", live.uploadImages, true);
 check("恢复默认会保存一次", saves, 1);
 // 控件本身也要跟着变，不然用户看到的是旧值
 check("输入框同步成 20", nodes[6].value, "20");
-check("下拉框同步成 suffix", nodes[5].value, "suffix");
-check("开关同步成选中", nodes[0].checked, true);
+check("下拉框同步成 suffix", nodes[0].value, "suffix");
+check("开关同步成选中", nodes[1].checked, true);
 
 /* ---------- mapLimit：查同名的并发器 ---------- */
 {

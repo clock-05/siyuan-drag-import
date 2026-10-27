@@ -25,12 +25,12 @@
 
 | Setting                     | Default | Meaning                                     |
 | --------------------------- | ------- | ------------------------------------------- |
+| Default handling for duplicates | Rename | Pre-selected on the conflict card        |
 | Upload attachments          | On      | Off keeps the original paths (images break)  |
-| No document for the folder  | Off     | Drop a folder and its contents land directly in the target; the folder itself doesn't become a document |
 | Strip frontmatter           | On      | Removes the leading YAML block; off keeps it as-is |
 | Remove duplicate first H1    | On      | Drop the heading when it repeats the name    |
 | Convert Obsidian wiki links | On      | `[[note]]` → block reference within the batch |
-| Default handling for duplicates | Rename | Pre-selected on the conflict card        |
+| No document for the folder  | Off     | Drop a folder and its contents land directly in the target; the folder itself doesn't become a document |
 | Max size per file (MB)      | 20      | Larger files are skipped and listed          |
 | Undo window (seconds)       | 30      | 10–300; raise it to check before undoing     |
 | Restore defaults            | —       | Resets and saves all of the above            |
