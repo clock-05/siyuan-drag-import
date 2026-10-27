@@ -135,8 +135,6 @@ export const zh = {
     uploadImagesDesc:
       "把正文里引用的本地图片、PDF 等文件传到 assets 并改写链接；关掉则保留原始相对路径（图片会显示不出来）",
     keepTopFolder: "保留顶层文件夹",
-    keepTopFolderDesc:
-      "拖入文件夹时，为被拖的那一个文件夹本身也建一篇文档；它里面的子文件夹无论开关如何都保留层级。关掉则内容直接放到拖放位置。",
     stripFrontmatter: "剥离 frontmatter",
     stripFrontmatterDesc:
       "去掉正文开头的 YAML 块（思源不解析它，留着会变成两条分隔线）；关掉则原样保留",
@@ -146,11 +144,8 @@ export const zh = {
     wikilinksDesc:
       "把 [[笔记]] 换成思源块引用；只对本批一起导入、能唯一对上名字的笔记生效，其余保留原样",
     conflictDefault: "同名冲突默认处理",
-    conflictDefaultDesc: "冲突卡片会预选这一项，仍可逐条改",
     maxSize: "单篇大小上限（MB）",
-    maxSizeDesc: "超过的 md 跳过并在结果卡片里列出",
     undoWindow: "撤销有效期（秒）",
-    undoWindowDesc: "结果卡片上的「撤销本次导入」在这段时间内可用；默认 30 秒。批量覆盖后想逐篇检查再调大",
     reset: "恢复默认设置",
     resetDesc: "把上面各项恢复成初始值，不会影响已经导入的文档",
     resetLabel: "恢复默认",

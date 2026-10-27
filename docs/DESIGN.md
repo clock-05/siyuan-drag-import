@@ -901,3 +901,13 @@ logger.ts           JSONL 落盘 + 清理
 - 键名同步 `keepFolderStructure` → **`keepTopFolder`**（同向迁移）。配置里可能同时存在三个键：
   `skipRootFolder`（1.0.3，**方向相反**，取反）、`keepFolderStructure`（同向，改名）、`keepTopFolder`（当前）。
   迁移顺序：当前键 > keepFolderStructure > skipRootFolder，迁完 `delete` 前两个。
+
+**v1.22（2026-10-27，去掉四项设置的说明文字）**：
+
+- 用户要求删掉 4 项设置的灰色说明，标题保留：同名冲突默认处理、撤销有效期、单篇大小上限、保留顶层文件夹。
+  理由是这四项的标题已经说清了自己（其中两项就是纯数字输入框，说明只是把范围又说一遍）。
+- 保留说明的 5 项：上传附件、剥离 frontmatter、移除重复的首行 H1、转换 Obsidian 双链、恢复默认 —— 
+  这几项**不看说明真的会误判**（尤其“上传附件”关掉等于图片断链）。
+- 顺带删掉词典里对应的 4 条字符串（`*Desc`），不留死文案。
+- **已核验**思源设置项模板是条件渲染：`${n.description ? '<div class="b3-label__text">…</div>' : ''}`，
+  不传 `description` 不会留一行空白。

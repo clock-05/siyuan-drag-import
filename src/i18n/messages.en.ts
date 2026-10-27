@@ -123,8 +123,6 @@ export const en: typeof zh = {
     uploadImagesDesc:
       "Copy referenced images, PDFs and other local files into assets and rewrite the links. Turn off to keep the original relative paths (images will then fail to load).",
     keepTopFolder: "Keep the top-level folder",
-    keepTopFolderDesc:
-      "A dropped folder becomes a document of its own; the sub-folders inside keep their nesting either way. Turn off to put the contents straight into the drop target.",
     stripFrontmatter: "Strip frontmatter",
     stripFrontmatterDesc:
       "Remove the YAML block at the top — SiYuan doesn't parse it, so it would show up as two horizontal rules. Turn off to keep it as-is.",
@@ -134,12 +132,8 @@ export const en: typeof zh = {
     wikilinksDesc:
       "Turn [[note]] into SiYuan block references for notes imported in the same batch; anything else stays as text.",
     conflictDefault: "Default handling for duplicates",
-    conflictDefaultDesc: "Pre-selected on the conflict card; you can still change it per file.",
     maxSize: "Max size per file (MB)",
-    maxSizeDesc: "Larger markdown files are skipped and listed on the result card.",
     undoWindow: "Undo window (seconds)",
-    undoWindowDesc:
-      "How long “Undo this import” stays available. Default 30 s. Raise it if you want to review a batch of replacements one by one.",
     reset: "Restore defaults",
     resetDesc: "Reset every option above. Already imported documents are not affected.",
     resetLabel: "Restore",

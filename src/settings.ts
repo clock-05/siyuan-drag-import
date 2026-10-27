@@ -158,7 +158,6 @@ export function createSettingPanel(settings: Settings, onChange: () => void): Se
 
   panel.addItem({
     title: text.conflictDefault,
-    description: text.conflictDefaultDesc,
     createActionElement: () => {
       const select = document.createElement("select");
       select.className = "b3-select fn__flex-center fn__size200";
@@ -181,7 +180,6 @@ export function createSettingPanel(settings: Settings, onChange: () => void): Se
 
   panel.addItem({
     title: text.undoWindow,
-    description: text.undoWindowDesc,
     createActionElement: () =>
       numberInput(
         () => settings.undoWindowSeconds,
@@ -196,7 +194,6 @@ export function createSettingPanel(settings: Settings, onChange: () => void): Se
 
   panel.addItem({
     title: text.maxSize,
-    description: text.maxSizeDesc,
     createActionElement: () =>
       numberInput(
         () => settings.maxFileMB,
@@ -211,7 +208,6 @@ export function createSettingPanel(settings: Settings, onChange: () => void): Se
 
   panel.addItem({
     title: text.keepTopFolder,
-    description: text.keepTopFolderDesc,
     createActionElement: () =>
       checkbox(
         () => settings.keepTopFolder,
