@@ -158,9 +158,13 @@ check("迁移后不残留旧键", "undoWindowMinutes" in norm({ undoWindowMinute
 check("冲突默认值非法时回退", norm({ conflictDefault: "乱写" }).conflictDefault, "suffix");
 check("stripFrontmatter 默认开", norm({}).stripFrontmatter, true);
 check("stripFrontmatter 关掉后保持关", norm({ stripFrontmatter: false }).stripFrontmatter, false);
-check("skipRootFolder 默认关（保持旧行为）", norm({}).skipRootFolder, false);
-check("skipRootFolder 存 true 才开", norm({ skipRootFolder: true }).skipRootFolder, true);
-check("skipRootFolder 非布尔值不误开", norm({ skipRootFolder: "yes" }).skipRootFolder, false);
+check("keepFolderStructure 默认开（文件夹本身成篇）", norm({}).keepFolderStructure, true);
+check("keepFolderStructure 关掉后保持关", norm({ keepFolderStructure: false }).keepFolderStructure, false);
+// 1.0.3 的键方向相反：存 true 是「不建外壳文档」→ 迁移后应为「不保留结构」
+check("旧键 skipRootFolder:true 迁移成不保留", norm({ skipRootFolder: true }).keepFolderStructure, false);
+check("旧键 skipRootFolder:false 迁移成保留", norm({ skipRootFolder: false }).keepFolderStructure, true);
+check("迁移后不残留旧键", "skipRootFolder" in norm({ skipRootFolder: true }), false);
+check("新键优先，旧键忽略", norm({ skipRootFolder: true, keepFolderStructure: true }).keepFolderStructure, true);
 
 /* ---------- 设置面板：恢复默认 ---------- */
 // 桩 Setting 不会自己建控件，这里手动把每个 item 的元素建出来并挂进 DOM
@@ -183,17 +187,18 @@ for (const node of nodes) {
 document.body.append(box);
 
 check("设置项共 9 项", panel.items.length, 9);
-check("输入框初始显示 50", nodes[6].value, "50");
+check("输入框初始显示 50", nodes[2].value, "50");
 nodes[8].dispatchEvent(new dom.window.Event("click"));
 check("恢复默认：大小上限回到 20", live.maxFileMB, 20);
 check("恢复默认：撤销窗口回到 30 秒", live.undoWindowSeconds, 30);
 check("恢复默认：冲突策略回到加后缀", live.conflictDefault, "suffix");
 check("恢复默认：开关回到开", live.uploadImages, true);
+check("恢复默认：文件夹结构回到保留", live.keepFolderStructure, true);
 check("恢复默认会保存一次", saves, 1);
 // 控件本身也要跟着变，不然用户看到的是旧值
-check("输入框同步成 20", nodes[6].value, "20");
+check("输入框同步成 20", nodes[2].value, "20");
 check("下拉框同步成 suffix", nodes[0].value, "suffix");
-check("开关同步成选中", nodes[1].checked, true);
+check("开关同步成选中（上传附件）", nodes[6].checked, true);
 
 /* ---------- mapLimit：查同名的并发器 ---------- */
 {

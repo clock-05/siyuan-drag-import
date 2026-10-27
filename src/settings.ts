@@ -5,10 +5,11 @@ import type { ConflictChoice } from "./import/planner";
 export interface Settings {
   uploadImages: boolean;
   /**
-   * 拖入文件夹时不为「这个文件夹本身」建文档，里面的内容直接落到拖放位置。
-   * 默认 false：文件夹也是一层父文档（拖 A 得到 A/…，与思源原生导入一致）。
+   * 拖入文件夹时保留外层那一级：文件夹本身也建成一篇文档（拖 A 得到 A/…，与思源原生导入一致）。
+   * 默认 true。关掉就把里面的内容直接放到拖放位置。
+   * 注意方向：这里存的是「保留结构」，内核那边要的是「跳过根」（`skipRootFolder`），传参时取反。
    */
-  skipRootFolder: boolean;
+  keepFolderStructure: boolean;
   /** 剥掉开头那段 YAML（默认剥；关掉则原样保留） */
   stripFrontmatter: boolean;
   removeDuplicateH1: boolean;
@@ -24,7 +25,7 @@ export const SETTINGS_KEY = "settings";
 
 export const DEFAULT_SETTINGS: Settings = {
   uploadImages: true,
-  skipRootFolder: false,
+  keepFolderStructure: true,
   stripFrontmatter: true,
   removeDuplicateH1: true,
   convertWikilinks: true,
@@ -61,6 +62,8 @@ function clamp(value: number, min: number, max: number): number {
 export function normalizeSettings(raw: unknown): Settings {
   const input = (raw ?? {}) as Partial<Settings> & {
     undoWindowMinutes?: number;
+    /** 1.0.3 及更早的键，方向与 keepFolderStructure 相反（true = 不建外壳文档） */
+    skipRootFolder?: boolean;
   };
   const merged: Settings = { ...DEFAULT_SETTINGS, ...input };
   if (!CONFLICT_VALUES.includes(merged.conflictDefault)) {
@@ -77,8 +80,15 @@ export function normalizeSettings(raw: unknown): Settings {
   delete (merged as any).undoWindowMinutes;
   merged.undoWindowSeconds = clamp(Number(merged.undoWindowSeconds), 10, 300);
 
+  // 1.0.3 存的键叫 skipRootFolder，方向相反（true = 不建外壳文档）。
+  // 名字换了、方向也换了 → 旧值必须取反迁移，否则老用户的结构会静默翻转。
+  if (!("keepFolderStructure" in input) && typeof input.skipRootFolder === "boolean") {
+    merged.keepFolderStructure = !input.skipRootFolder;
+  }
+  delete (merged as any).skipRootFolder;
+
   merged.uploadImages = merged.uploadImages !== false;
-  merged.skipRootFolder = merged.skipRootFolder === true;
+  merged.keepFolderStructure = merged.keepFolderStructure !== false;
   merged.stripFrontmatter = merged.stripFrontmatter !== false;
   merged.removeDuplicateH1 = merged.removeDuplicateH1 !== false;
   merged.convertWikilinks = merged.convertWikilinks !== false;
@@ -162,13 +172,43 @@ export function createSettingPanel(settings: Settings, onChange: () => void): Se
   });
 
   panel.addItem({
-    title: text.uploadImages,
-    description: text.uploadImagesDesc,
+    title: text.undoWindow,
+    description: text.undoWindowDesc,
+    createActionElement: () =>
+      numberInput(
+        () => settings.undoWindowSeconds,
+        10,
+        300,
+        (value) => {
+          settings.undoWindowSeconds = value;
+        },
+        track,
+      ),
+  });
+
+  panel.addItem({
+    title: text.maxSize,
+    description: text.maxSizeDesc,
+    createActionElement: () =>
+      numberInput(
+        () => settings.maxFileMB,
+        1,
+        200,
+        (value) => {
+          settings.maxFileMB = value;
+        },
+        track,
+      ),
+  });
+
+  panel.addItem({
+    title: text.keepFolderStructure,
+    description: text.keepFolderStructureDesc,
     createActionElement: () =>
       checkbox(
-        () => settings.uploadImages,
+        () => settings.keepFolderStructure,
         (value) => {
-          settings.uploadImages = value;
+          settings.keepFolderStructure = value;
         },
         track,
       ),
@@ -201,6 +241,19 @@ export function createSettingPanel(settings: Settings, onChange: () => void): Se
   });
 
   panel.addItem({
+    title: text.uploadImages,
+    description: text.uploadImagesDesc,
+    createActionElement: () =>
+      checkbox(
+        () => settings.uploadImages,
+        (value) => {
+          settings.uploadImages = value;
+        },
+        track,
+      ),
+  });
+
+  panel.addItem({
     title: text.wikilinks,
     description: text.wikilinksDesc,
     createActionElement: () =>
@@ -208,49 +261,6 @@ export function createSettingPanel(settings: Settings, onChange: () => void): Se
         () => settings.convertWikilinks,
         (value) => {
           settings.convertWikilinks = value;
-        },
-        track,
-      ),
-  });
-
-  panel.addItem({
-    title: text.skipRootFolder,
-    description: text.skipRootFolderDesc,
-    createActionElement: () =>
-      checkbox(
-        () => settings.skipRootFolder,
-        (value) => {
-          settings.skipRootFolder = value;
-        },
-        track,
-      ),
-  });
-
-  panel.addItem({
-    title: text.maxSize,
-    description: text.maxSizeDesc,
-    createActionElement: () =>
-      numberInput(
-        () => settings.maxFileMB,
-        1,
-        200,
-        (value) => {
-          settings.maxFileMB = value;
-        },
-        track,
-      ),
-  });
-
-  panel.addItem({
-    title: text.undoWindow,
-    description: text.undoWindowDesc,
-    createActionElement: () =>
-      numberInput(
-        () => settings.undoWindowSeconds,
-        10,
-        300,
-        (value) => {
-          settings.undoWindowSeconds = value;
         },
         track,
       ),

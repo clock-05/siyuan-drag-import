@@ -216,7 +216,8 @@ module.exports = class DragImport extends Plugin {
 
       const analyzeStarted = Date.now();
       const analysis = analyzeSources(files, batch, {
-        skipRootFolder: this.settings.skipRootFolder,
+        // 设置里存的是「保留结构」，analyze 要的是「跳过根」，方向相反
+        skipRootFolder: !this.settings.keepFolderStructure,
       });
       const analyzeMs = Date.now() - analyzeStarted;
       skipped.push(...analysis.rejected);

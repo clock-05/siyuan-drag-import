@@ -26,13 +26,13 @@
 | Setting                     | Default | Meaning                                     |
 | --------------------------- | ------- | ------------------------------------------- |
 | Default handling for duplicates | Rename | Pre-selected on the conflict card        |
-| Upload attachments          | On      | Off keeps the original paths (images break)  |
+| Undo window (seconds)       | 30      | 10–300; raise it to check before undoing     |
+| Max size per file (MB)      | 20      | Larger files are skipped and listed          |
+| Keep the folder structure    | On      | A dropped folder becomes a document of its own; off puts its contents straight into the drop target |
 | Strip frontmatter           | On      | Removes the leading YAML block; off keeps it as-is |
 | Remove duplicate first H1    | On      | Drop the heading when it repeats the name    |
+| Upload attachments          | On      | Off keeps the original paths (images break)  |
 | Convert Obsidian wiki links | On      | `[[note]]` → block reference within the batch |
-| No document for the folder  | Off     | Drop a folder and its contents land directly in the target; the folder itself doesn't become a document |
-| Max size per file (MB)      | 20      | Larger files are skipped and listed          |
-| Undo window (seconds)       | 30      | 10–300; raise it to check before undoing     |
 | Restore defaults            | —       | Resets and saves all of the above            |
 
 ## Markdown compatibility

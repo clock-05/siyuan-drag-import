@@ -122,9 +122,9 @@ export const en: typeof zh = {
     uploadImages: "Upload attachments",
     uploadImagesDesc:
       "Copy referenced images, PDFs and other local files into assets and rewrite the links. Turn off to keep the original relative paths (images will then fail to load).",
-    skipRootFolder: "Don't create a document for the folder",
-    skipRootFolderDesc:
-      "Put a dropped folder's contents straight into the drop target instead of creating an empty document for the folder itself. Sub-folders still become documents; zip archives are unaffected.",
+    keepFolderStructure: "Keep the folder structure",
+    keepFolderStructureDesc:
+      "A dropped folder becomes a document of its own, with its contents nested under it. Turn off to put the contents straight into the drop target. Zip archives are unaffected.",
     stripFrontmatter: "Strip frontmatter",
     stripFrontmatterDesc:
       "Remove the YAML block at the top — SiYuan doesn't parse it, so it would show up as two horizontal rules. Turn off to keep it as-is.",
