@@ -193,6 +193,87 @@ check("编辑器里的 drop 完全放行（保持原生插图）", !dropOutside.
 const dropOnBody = dragEvent("drop", document.body);
 check("树和编辑器之外只做兜底 preventDefault", dropOnBody.defaultPrevented);
 
+/* ---------- 3.8.10：文档树换成 li[data-tree-key] 虚拟列表 ---------- */
+// 新结构里没有 ul[data-url]，且 fileTree.boxDocEnabled 默认关 → 笔记本行的
+// data-node-id 是空串。笔记本 id 只在 data-tree-key 的 "notebook:<id>[/<doc>]" 里。
+const panel2 = document.createElement("div");
+panel2.className = "sy__file";
+panel2.innerHTML = `
+  <div class="file-tree__pins-list">
+    <ul class="b3-list">
+      <li class="b3-list-item file-tree__row" data-type="navigation-file" data-node-id="doc-7" data-tree-key="pin:doc-7"><span class="b3-list-item__text">置顶文档</span></li>
+    </ul>
+  </div>
+  <div class="file-tree__items">
+    <ul class="b3-list fn__flex-column">
+      <li class="b3-list-item file-tree__row" data-type="navigation-root" data-node-id="" data-tree-key="notebook:nb-9"><span class="b3-list-item__text">数学</span></li>
+      <li class="b3-list-item file-tree__row" data-type="navigation-file" data-node-id="doc-9" data-tree-key="notebook:nb-9/doc-9"><span class="b3-list-item__text">函数</span></li>
+      <li class="b3-list-item file-tree__row" data-type="navigation-file" data-node-id="doc-10" data-tree-key="notebook:nb-9/doc-10"><span class="b3-list-item__text">极限</span></li>
+      <li class="b3-list-item file-tree__row" data-type="navigation-closed" data-node-id="" data-tree-key="notebook:nb-8"><span class="b3-list-item__text">加密本</span></li>
+    </ul>
+  </div>`;
+document.body.append(panel2);
+
+const v2Rows = Array.from(panel2.querySelectorAll(".file-tree__items li[data-tree-key]"));
+// jsdom 没有布局，手动给行排位置：每行 26px，从 y=100 开始
+v2Rows.forEach((row, index) => {
+  const top = 100 + index * 26;
+  row.getBoundingClientRect = () => ({
+    top,
+    bottom: top + 26,
+    height: 26,
+    left: 0,
+    right: 200,
+    width: 200,
+    x: 0,
+    y: top,
+    toJSON() {},
+  });
+});
+
+const v2Row = (key) => panel2.querySelector(`li[data-tree-key="${key}"]`);
+let captured = null;
+const originalOnDrop = plugin.controller.onDrop;
+plugin.controller.onDrop = async (_files, target) => {
+  captured = target;
+};
+const dropAt = async (el, y) => {
+  dragEvent("dragover", el, { y });
+  dragEvent("drop", el, { files: [{ name: "a.md" }], y });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  return captured;
+};
+
+captured = null;
+let t2 = await dropAt(v2Row("notebook:nb-9"), 110);
+check("3.8.10 · 拖到笔记本行能拿到笔记本 id", t2?.notebook === "nb-9", JSON.stringify(t2?.notebook));
+check("3.8.10 · 笔记本行不算父文档", t2?.parentDocId === undefined && t2?.isNotebookRoot === true);
+check("3.8.10 · 横幅用笔记本名", (banner()?.textContent ?? "").includes("数学"), banner()?.textContent ?? "");
+
+captured = null;
+t2 = await dropAt(v2Row("notebook:nb-9/doc-9"), 130);
+check("3.8.10 · 文档行解析出所属笔记本", t2?.notebook === "nb-9", JSON.stringify(t2?.notebook));
+check("3.8.10 · 文档行以自身为父级", t2?.parentDocId === "doc-9" && t2?.isNotebookRoot === false);
+
+captured = null;
+t2 = await dropAt(v2Row("notebook:nb-8"), 190);
+check("3.8.10 · 加密关闭的笔记本仍算根行", t2?.notebook === "nb-8" && t2?.isNotebookRoot === true);
+
+captured = null;
+t2 = await dropAt(v2Row("pin:doc-7"), 230);
+check("3.8.10 · 置顶行没有笔记本信息，交给反查", t2?.notebook === "" && t2?.parentDocId === "doc-7");
+
+// 面板空白：按纵坐标归到最后一个在指针上方的行所属的笔记本
+captured = null;
+t2 = await dropAt(panel2.querySelector(".file-tree__items"), 300);
+check("3.8.10 · 空白处落到所在笔记本根级", t2?.notebook === "nb-8", JSON.stringify(t2?.notebook));
+captured = null;
+t2 = await dropAt(panel2.querySelector(".file-tree__items"), 160);
+check("3.8.10 · 空白处（数学区间）归数学", t2?.notebook === "nb-9", JSON.stringify(t2?.notebook));
+
+plugin.controller.onDrop = originalOnDrop;
+panel2.remove();
+
 /* ---------- Esc ---------- */
 dragEvent("dragover", docRow, { y: 40 });
 const esc = new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true });

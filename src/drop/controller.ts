@@ -5,13 +5,13 @@ import { DropOverlay } from "./overlay";
 import {
   isFileDrag,
   isNotebookRow,
+  notebookAtY,
+  notebookIdOfRow,
   panelOf,
   rowOf,
   rowText,
   scrollHostOf,
-  sectionAtY,
   sectionNotebookId,
-  sectionNotebookName,
   sectionOfRow,
 } from "./selectors";
 
@@ -28,6 +28,29 @@ export interface DropTarget {
 
 type DropHandler = (files: File[], target: DropTarget) => Promise<void> | void;
 
+/**
+ * 行 → 笔记本 id。三种来源按可靠度排：
+ *   1. 3.8.10 的 data-tree-key（`notebook:<id>[/<doc>]`）—— 笔记本行也有
+ *   2. ≤3.8.9 的 ul[data-url] 分段
+ *   3. 旧版笔记本行自身的 data-node-id
+ * 3.8.10 默认 boxDocEnabled=false，笔记本行的 data-node-id 是空串，
+ * 少了 1 就整批报「无法判断目标笔记本」。
+ */
+function notebookOfRow(row: HTMLElement, isNotebook: boolean): string {
+  const fromKey = notebookIdOfRow(row);
+  if (fromKey) {
+    return fromKey;
+  }
+  const section = sectionOfRow(row);
+  if (section) {
+    const fromSection = sectionNotebookId(section);
+    if (fromSection) {
+      return fromSection;
+    }
+  }
+  return isNotebook ? (row.getAttribute("data-node-id") ?? "") : "";
+}
+
 /** 松手位置 → 目标层级。纯 DOM 同步判断，悬浮阶段每秒几十次也不怕 */
 function resolveTarget(node: EventTarget | null, clientY: number): DropTarget | null {
   const panel = panelOf(node);
@@ -38,10 +61,9 @@ function resolveTarget(node: EventTarget | null, clientY: number): DropTarget | 
   const row = rowOf(node, panel);
   if (row) {
     const isNotebook = isNotebookRow(row);
-    const section = sectionOfRow(row);
     const nodeId = row.getAttribute("data-node-id") ?? "";
     return {
-      notebook: section ? sectionNotebookId(section) : isNotebook ? nodeId : "",
+      notebook: notebookOfRow(row, isNotebook),
       parentDocId: isNotebook ? undefined : nodeId || undefined,
       label: rowText(row) || (isNotebook ? m().flow.defaultNotebook : m().flow.defaultDoc),
       isNotebookRoot: isNotebook,
@@ -50,13 +72,13 @@ function resolveTarget(node: EventTarget | null, clientY: number): DropTarget | 
   }
 
   // 面板空白：按纵坐标归到所在的笔记本段，落根级
-  const section = sectionAtY(panel, clientY);
-  if (!section) {
+  const spot = notebookAtY(panel, clientY);
+  if (!spot) {
     return null;
   }
   return {
-    notebook: sectionNotebookId(section),
-    label: sectionNotebookName(section) || m().flow.defaultNotebook,
+    notebook: spot.notebook,
+    label: spot.label || m().flow.defaultNotebook,
     isNotebookRoot: true,
     row: null,
   };

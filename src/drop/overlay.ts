@@ -1,4 +1,5 @@
 import { m } from "../i18n";
+import { isNotebookRow } from "./selectors";
 import type { DropTarget } from "./controller";
 
 /**
@@ -94,7 +95,7 @@ export class DropOverlay {
     this.rowEl = row;
     if (row) {
       row.classList.add("sdi-row");
-      if (row.getAttribute("data-type") === "navigation-root") {
+      if (isNotebookRow(row)) {
         row.classList.add("sdi-row--notebook");
       }
     }

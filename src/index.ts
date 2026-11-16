@@ -186,6 +186,13 @@ module.exports = class DragImport extends Plugin {
       batch?.event("import", "start", {
         count: files.length,
         target: rawTarget.label,
+        notebook: rawTarget.notebook || undefined,
+        parentDocId: rawTarget.parentDocId,
+        notebookRoot: rawTarget.isNotebookRoot,
+        // 拖拽目标的原始 DOM 特征：下次思源再改文档树，看这行就知道命中的是什么
+        rowKey: rawTarget.row?.getAttribute("data-tree-key") ?? undefined,
+        rowType: rawTarget.row?.getAttribute("data-type") ?? undefined,
+        rowNodeId: rawTarget.row?.getAttribute("data-node-id") ?? undefined,
         sinceLoad: Date.now() - this.loadedAt,
       });
 
@@ -588,6 +595,9 @@ module.exports = class DragImport extends Plugin {
     started: number,
     skipped: RejectedSource[] = [],
   ): void {
+    // 整批失败也要落一条：1.0.5 的「无法判断目标笔记本」当初就是日志里只有 start，
+    // 只能靠猜。现在把原因和耗时写进同一份文件。
+    batch?.event("import", "failed", { reason: message, ms: Date.now() - started });
     showMessage(m().flow.warning(message), 6000, "error");
     if (this.disposed) {
       return;
