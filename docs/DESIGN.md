@@ -936,3 +936,30 @@ logger.ts           JSONL 落盘 + 清理
   不把内核英文原文抛给用户。其它错误不重试。
 - 单测：`__setIndexWaitDelays` 注入 0 延迟，断言「第 3 次成功」「耗尽 4 次上限」「普通错误只试 1 次」。
 - **3.8.10 上 e2e 137 项全绿**（此前 0 项，直接崩）。
+
+**v1.25（2026-11-16，3.8.10 文档树换虚拟列表 → 拖到笔记本上报「无法判断目标笔记本」）**：
+
+- 现象：数学工作空间里往「助教任务」笔记本上拖，卡片「失败 1 / 导入未完成 / 无法判断目标笔记本」，
+  耗时 2ms，日志里只有 `import/start`，再没有任何后续条目。
+- 根因：3.8.10 把文档树换成了虚拟列表，`ul[data-url="<笔记本id>"]` 分段容器没了；
+  笔记本 id 改放在行属性 `li[data-tree-key]` 里（`notebook:<id>`、`notebook:<id>/<doc>`、`pin:<doc>`）。
+  更致命的是新模板里 `data-node-id` 对笔记本行算成
+  `A = t && !g ? "" : m.id`（`g = fileTree.boxDocEnabled`，默认 false）→ **笔记本行的 data-node-id 是空串**。
+  旧逻辑「笔记本行 → 拿自己的 data-node-id 当笔记本 id」于是拿到 ""，`completeTarget` 又因为没有
+  parentDocId 无从反查，直接返回 null。3.8.9 及以前走 `ul[data-url]`，所以一直没暴露。
+- 修法（`src/drop/selectors.ts` + `controller.ts`）：
+  - 新增 `notebookIdOfRow()`：从 `data-tree-key` 解析 `/^notebook:([^/]+)/`。三种来源按可靠度排：
+    tree-key → `ul[data-url]`（≤3.8.9）→ 笔记本行自身 node-id（更旧的结构）。
+  - 文档行因此**不再需要 `getBlockInfo` 反查**：少一次 API，也绕开了 3.8.10 的索引未就绪。
+    `pin:<doc>` 行没有笔记本信息，仍走反查。
+  - `isNotebookRow()` 把 `navigation-closed`（加密未解锁）也算根行，否则这类行会被当成文档。
+  - 空白处落点：旧版按 `ul[data-url]` 分段；新版新增 `notebookAtY()`，按纵坐标找最后一个在指针上方的行，
+    取它的 tree-key —— 虚拟列表里同一笔记本的行是连续的，等价于分段；根行被滚出可视区时名字留空，
+    由横幅回落到「笔记本」。
+- **卡片截断**：`.sdi-card__list li` 原本两列都是 `nowrap + 55% 上限`，「无法判断目标笔记本，请拖到具体的
+  笔记本或文档上」被切成「…请拖…」。改为名字列 `flex: 0 1 auto; max-width: 46%` 截断，
+  原因列 `flex: 1 1 auto; white-space: normal; overflow-wrap: anywhere` 换行说完，两列顶对齐。
+- **日志**：`import/start` 增记 `notebook` / `parentDocId` / `notebookRoot` / `rowKey` / `rowType` /
+  `rowNodeId`（拖拽目标的原始 DOM 特征）；`fail()` 补一条 `import/failed`（带 `reason` 与 `ms`）。
+  以前整批失败在日志里等于空白，只能靠猜。
+- 冒烟测试新增 8 项：3.8.10 结构的笔记本行 / 文档行 / 加密根行 / 置顶行 / 空白落点（含 y 归段）。
