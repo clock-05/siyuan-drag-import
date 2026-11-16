@@ -179,25 +179,29 @@
 
 .sdi-card__list li {
   display: flex;
+  /* 原因换行后两列要顶对齐，不然名字会飘到中间 */
+  align-items: flex-start;
   gap: 8px;
   padding: 2px 0;
   color: var(--b3-theme-on-surface, #5f6368);
 }
 
 .sdi-card__list li span:first-child {
-  flex: 1;
+  flex: 0 1 auto;
+  max-width: 46%;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* 原因说明：短的一行右对齐，长的换行说完。
+   以前这里是 nowrap + 55% 上限，「无法判断目标笔记本，请拖…」会被截掉半句。 */
 .sdi-card__list li span:last-child {
-  flex: none;
-  max-width: 55%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
   opacity: 0.75;
 }
 
