@@ -921,3 +921,18 @@ logger.ts           JSONL 落盘 + 清理
 - 「发布服务：禁用」= `plugin.json.disabledInPublish: true`（集市「兼容性」区块的一个信息项），
   **是主动声明**：思源的发布服务（`publish.enable`，把工作空间当只读站点对外提供）里不加载本插件。
   本插件是桌面端 + 本地文件系统，发布服务里没有这些能力，参与加载只会报错，所以禁用是对的，不需要改。
+
+**v1.24（2026-11-16，适配 SiYuan 3.8.10）**：
+
+- **3.8.10 引入「结构化文档元数据」索引**：刚启动、刚建/开笔记本时索引未就绪，文档寻址类 API
+  （`getIDsByHPath` / `createDocWithMd` / `getHPathByID`）直接返回
+  `code -1` + `msg "document metadata is not ready"` + `data.reason "indexUnavailable"`。
+  内核文档（`docs/DOCUMENT-ADDRESSING.zh-CN.md` 第 325、369 行）写明：**调用方等待恢复，
+  不能当成文档不存在，也不能回退到显示路径**。
+- 症状：e2e 在 3.8.10 上直接崩在「覆盖前扫描到冲突」——`getIDsByHPath` 报错被 `scanPlan` 的
+  catch 当成「查重失败」，`entries` 为空。真实场景里就是「拖进去一篇都没建 / 全部标成跳过」。
+- 修法：`api.ts` 的 `post` 对 `indexUnavailable` **退避重试**（150/250/400/700/1200/2000/3000ms，
+  合计约 7.7s）；等够了仍不就绪则抛 `error.indexNotReady`（「思源正在建立文档索引，请稍后再试」），
+  不把内核英文原文抛给用户。其它错误不重试。
+- 单测：`__setIndexWaitDelays` 注入 0 延迟，断言「第 3 次成功」「耗尽 4 次上限」「普通错误只试 1 次」。
+- **3.8.10 上 e2e 137 项全绿**（此前 0 项，直接崩）。

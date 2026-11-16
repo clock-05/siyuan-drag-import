@@ -214,7 +214,8 @@ function describeAssets(stats: AssetStats): string {
 
   const missing = stats.images.missing + stats.files.missing;
   if (missing > 0) {
-    parts.push(text.asset.missing(missing, summarizeExts(collect(kinds, "missing"))));
+    const sample = stats.missingNames?.[0] ?? "";
+    parts.push(text.asset.missing(missing, summarizeExts(collect(kinds, "missing")), sample));
   }
 
   const failed = stats.images.failed + stats.files.failed;

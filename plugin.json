@@ -2,7 +2,7 @@
   "name": "siyuan-drag-import",
   "author": "clock-05 & DeepSeek",
   "url": "https://github.com/clock-05/siyuan-drag-import",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "minAppVersion": "3.8.0",
   "backends": [
     "windows"

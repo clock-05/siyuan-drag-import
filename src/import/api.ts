@@ -29,34 +29,68 @@ const DEFAULT_TIMEOUT = 15000;
 /** 上传是唯一可能很慢的调用（大 PDF、网络盘），给它 60 秒 */
 const UPLOAD_TIMEOUT_MS = 60000;
 
+/**
+ * 3.8.10 起内核引入「结构化文档元数据」索引：刚启动、刚建/开笔记本时索引还没建好，
+ * 文档寻址类 API（getIDsByHPath / createDocWithMd / getHPathByID …）会直接返回
+ * `code -1` + `data.reason = "indexUnavailable"`。内核文档写明「调用方等待恢复，
+ * 不能当成文档不存在」——不重试的话，这一批会被误判成「查重失败」而整批跳过。
+ *
+ * 退避总时长约 7.7 秒：够覆盖一次常规索引重建，又不至于让用户以为卡死。
+ */
+const INDEX_WAIT_DELAYS = [150, 250, 400, 700, 1200, 2000, 3000];
+
+/** 只给测试用：把退避改成 0，免得单测真的等 7 秒 */
+export function __setIndexWaitDelays(delays: number[]): void {
+  indexWaitDelays = delays;
+}
+
+let indexWaitDelays = INDEX_WAIT_DELAYS;
+
+function isIndexNotReady(json: any): boolean {
+  return json?.data?.reason === "indexUnavailable" || /metadata is not ready/i.test(String(json?.msg ?? ""));
+}
+
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function post<T>(api: string, body: Record<string, unknown>, timeoutMs = DEFAULT_TIMEOUT): Promise<T> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const res = await fetch(api, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body ?? {}),
-      signal: controller.signal,
-    });
-    if (!res.ok) {
-      throw new ApiError(`HTTP ${res.status}`, api, res.status);
+  for (let attempt = 0; ; attempt += 1) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(api, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body ?? {}),
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        throw new ApiError(`HTTP ${res.status}`, api, res.status);
+      }
+      const json: any = await res.json();
+      if (json?.code !== 0) {
+        if (attempt < indexWaitDelays.length && isIndexNotReady(json)) {
+          clearTimeout(timer);
+          await sleep(indexWaitDelays[attempt]);
+          continue;
+        }
+        // 等够了还是没就绪：给一句能看懂的话，别把内核原文抛给用户
+        if (isIndexNotReady(json)) {
+          throw new ApiError(m().error.indexNotReady, api, -1);
+        }
+        throw new ApiError(String(json?.msg || `code ${json?.code}`), api, Number(json?.code) || -1);
+      }
+      return json.data as T;
+    } catch (error: any) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      if (error?.name === "AbortError") {
+        throw new ApiError(m().error.timeout(timeoutMs), api, -1);
+      }
+      throw new ApiError(String(error?.message ?? error), api, -1);
+    } finally {
+      clearTimeout(timer);
     }
-    const json: any = await res.json();
-    if (json?.code !== 0) {
-      throw new ApiError(String(json?.msg || `code ${json?.code}`), api, Number(json?.code) || -1);
-    }
-    return json.data as T;
-  } catch (error: any) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-    if (error?.name === "AbortError") {
-      throw new ApiError(m().error.timeout(timeoutMs), api, -1);
-    }
-    throw new ApiError(String(error?.message ?? error), api, -1);
-  } finally {
-    clearTimeout(timer);
   }
 }
 

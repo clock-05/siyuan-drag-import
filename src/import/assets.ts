@@ -18,6 +18,11 @@ export interface AssetStats {
   files: AssetCounter;
   /** `{ ".pdf": {uploaded:1,...} }`，图片与文件都在这里 */
   kinds: AssetKinds;
+  /**
+   * 找不到的附件名，最多记 3 个，只为了在卡片上给出「如 xxx.jpg」。
+   * 光说「5 个附件找不到」，用户没法判断是名字对不上还是文件真没跟着来。
+   */
+  missingNames: string[];
 }
 
 export function emptyAssetStats(): AssetStats {
@@ -25,6 +30,7 @@ export function emptyAssetStats(): AssetStats {
     images: { uploaded: 0, missing: 0, failed: 0 },
     files: { uploaded: 0, missing: 0, failed: 0 },
     kinds: {},
+    missingNames: [],
   };
 }
 
@@ -111,6 +117,19 @@ function baseName(ref: string): string {
   return index < 0 ? normalized : normalized.slice(index + 1);
 }
 
+/**
+ * 卡片上给用户看的缺失文件名：去掉目录、`?query`、`#anchor`，并解一次 URL 编码。
+ * 只用于显示，不参与任何路径解析。
+ */
+function missingLabel(ref: string): string {
+  const bare = baseName(ref.split("?")[0].split("#")[0]);
+  try {
+    return decodeURIComponent(bare) || ref;
+  } catch {
+    return bare || ref;
+  }
+}
+
 /** 链接文字里的 `[` `]` 会破坏 Markdown 结构（`[Zwonek 2012] ....pdf` 这种文件名很常见） */
 function escapeText(value: string): string {
   return value.replace(/[[\]]/g, "\\$&");
@@ -180,6 +199,12 @@ async function resolveRef(
   if (!blob) {
     counter.missing += 1;
     if (kind) kind.missing += 1;
+    if (stats.missingNames.length < 3) {
+      const label = missingLabel(ref);
+      if (!stats.missingNames.includes(label)) {
+        stats.missingNames.push(label);
+      }
+    }
     return null;
   }
   if (blob.bytes.byteLength > MAX_ASSET_BYTES) {

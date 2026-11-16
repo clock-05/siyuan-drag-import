@@ -95,7 +95,8 @@ export const en: typeof zh = {
 
   asset: {
     uploaded: (count, exts) => `${count === 1 ? "1 attachment" : `${count} attachments`} uploaded${exts}`,
-    missing: (count, exts) => `${count === 1 ? "1 attachment" : `${count} attachments`} not found${exts}`,
+    missing: (count, exts, sample = "") =>
+      `${count === 1 ? "1 attachment" : `${count} attachments`} not found${exts}${sample ? ` (e.g. ${sample})` : ""}`,
     failed: (count, exts) => `${count === 1 ? "1 attachment" : `${count} attachments`} failed to upload${exts}`,
     keepRaw: " — links left unchanged",
   },
@@ -183,6 +184,7 @@ export const en: typeof zh = {
     uploadTimeout: (seconds) => `Upload timed out (${seconds}s)`,
     timeout: (ms) => `Kernel response timed out (${ms}ms)`,
     noKramdown: "The kernel didn't return kramdown",
+    indexNotReady: "SiYuan is still building its document index — try again in a moment",
     appendHeader: (name, stamp) => `> Imported from ${name} (${stamp})`,
   },
 

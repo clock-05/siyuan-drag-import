@@ -60,7 +60,7 @@ Four things get changed; everything else is handed to SiYuan untouched.
 ## Troubleshooting
 
 - Nothing happens on drop: make sure the file is dropped on the **document tree** (the editor has its own drag-and-drop) and that the plugin is enabled.
-- "Attachment not found" on the card: the Markdown refers to a file that is not next to it (or inside the dragged folder). The link is kept as-is.
+- "Attachment not found" on the card: the file name written in the Markdown doesn't exist next to it (the card shows one example, e.g. `file-20260907194803772.jpg`). The link is left as-is — to get the image in, make the **file name match the reference**. Usually it means the `.md` was copied over without its images.
 - Something went wrong: click **Open log** on the result card; the JSONL is in `<workspace>/data/storage/petal/siyuan-drag-import/logs/`. It records each phase and its duration.
 
 ## Development

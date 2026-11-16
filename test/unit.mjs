@@ -16,6 +16,7 @@ rmSync(BUILD, { recursive: true, force: true });
 await esbuild.build({
   entryPoints: [
     "src/import/naming.ts",
+    "src/import/api.ts",
     "src/import/markdown.ts",
     "src/labels.ts",
     "src/settings.ts",
@@ -43,6 +44,7 @@ global.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
 
 const naming = await import(`../${BUILD}/import/naming.mjs?t=${Date.now()}`);
 const markdown = await import(`../${BUILD}/import/markdown.mjs?t=${Date.now()}`);
+const api = await import(`../${BUILD}/import/api.mjs?t=${Date.now()}`);
 const labels = await import(`../${BUILD}/labels.mjs?t=${Date.now()}`);
 const settings = await import(`../${BUILD}/settings.mjs?t=${Date.now()}`);
 const { mapLimit } = await import(`../${BUILD}/util/mapLimit.mjs?t=${Date.now()}`);
@@ -203,6 +205,54 @@ check("恢复默认会保存一次", saves, 1);
 check("输入框同步成 20", nodes[2].value, "20");
 check("下拉框同步成 suffix", nodes[0].value, "suffix");
 check("开关同步成选中（上传附件）", nodes[6].checked, true);
+
+/* ---------- 3.8.10：索引未就绪（indexUnavailable）要重试 ---------- */
+{
+  const realFetch = globalThis.fetch;
+  const reply = (body) => ({ ok: true, status: 200, json: async () => body });
+  const notReady = { code: -1, msg: 'document metadata is not ready', data: { reason: 'indexUnavailable' } };
+  const okBody = { code: 0, msg: '', data: ['20260101000000-abcdefg'] };
+
+  // 退避改成 0，单测不用真等 7 秒
+  api.__setIndexWaitDelays([0, 0, 0]);
+
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls += 1;
+    return reply(calls < 3 ? notReady : okBody);
+  };
+  const ids = await api.getIDsByHPath('nb', '/笔记');
+  checkTrue('索引未就绪时自动重试', calls === 3, 'calls=' + calls);
+  checkTrue('重试成功后拿到 id', ids.length === 1 && ids[0] === '20260101000000-abcdefg', JSON.stringify(ids));
+
+  let attempts = 0;
+  globalThis.fetch = async () => {
+    attempts += 1;
+    return reply(notReady);
+  };
+  let message = '';
+  try {
+    await api.getIDsByHPath('nb', '/x');
+  } catch (error) {
+    message = String(error?.message ?? error);
+  }
+  checkTrue('重试次数有上限', attempts === 4, String(attempts));
+  checkTrue('耗尽后给可读提示', message.includes('索引'), message);
+
+  let plain = 0;
+  globalThis.fetch = async () => {
+    plain += 1;
+    return reply({ code: -1, msg: 'boom', data: null });
+  };
+  try {
+    await api.getIDsByHPath('nb', '/y');
+  } catch {
+    /* 预期的失败 */
+  }
+  checkTrue('其它错误不重试', plain === 1, String(plain));
+
+  globalThis.fetch = realFetch;
+}
 
 /* ---------- mapLimit：查同名的并发器 ---------- */
 {

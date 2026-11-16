@@ -127,6 +127,8 @@ const run = async (markdown) => {
   const { text, stats } = await run("![规格书](files/没有.pdf)");
   check("缺失的 pdf 图片语法也降级", text === "[规格书](files/没有.pdf)", text);
   check("降级后计缺失", stats.files.missing === 1, JSON.stringify(stats));
+  // 卡片要能说出「如 xxx.pdf」，光给个数用户没法判断是名字对不上还是文件没跟来
+  check("缺失项记下了文件名", (stats.missingNames ?? []).includes("没有.pdf"), JSON.stringify(stats.missingNames));
 }
 {
   const { text } = await run("![图](img/a.png)[pdf](files/讲义.pdf)");

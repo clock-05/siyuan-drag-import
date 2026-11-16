@@ -105,7 +105,8 @@ export const zh = {
   /** 附件上传统计 */
   asset: {
     uploaded: (count: number, exts: string) => `已上传 ${count} 个附件${exts}`,
-    missing: (count: number, exts: string) => `${count} 个附件找不到${exts}`,
+    missing: (count: number, exts: string, sample = "") =>
+      `${count} 个附件找不到${exts}${sample ? `，如 ${sample}` : ""}`,
     failed: (count: number, exts: string) => `${count} 个附件上传失败${exts}`,
     keepRaw: "，链接保持原样",
   },
@@ -198,6 +199,7 @@ export const zh = {
     uploadTimeout: (seconds: number) => `上传超时（${seconds}s）`,
     timeout: (ms: number) => `内核响应超时（${ms}ms）`,
     noKramdown: "内核没有返回 kramdown",
+    indexNotReady: "思源正在建立文档索引，请稍后再试",
     appendHeader: (name: string, stamp: string) => `> 以下内容来自 ${name}（${stamp} 导入）`,
   },
 
