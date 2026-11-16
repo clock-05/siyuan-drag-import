@@ -42,10 +42,10 @@ jobs:
         with:
           files: package.zip
           fail_on_unmatched_files: true
-          # 集市详情页会展示这段：写清兼容基线，比自动生成的 commit 列表有用
+          # 集市详情页会展示这段：只写实测过的兼容基线，不承诺没跑过的版本
           body: |
             **兼容 SiYuan 3.8.10**：3.8.10 把文档树换成了虚拟列表，本版已适配 ——
-            拖到笔记本、文档或空白处都能正确定位目标层级。同时兼容 SiYuan 3.8.0 – 3.8.9。
+            拖到笔记本、文档或空白处都能正确定位目标层级。
 
             **SiYuan 3.8.10 compatible.** The document tree became a virtual list in 3.8.10;
-            this release handles it and still works on 3.8.0 – 3.8.9.
+            this release handles it.
